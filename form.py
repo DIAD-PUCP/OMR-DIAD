@@ -19,14 +19,19 @@ class BlockType(str, Enum):
     BIN = "BIN"
 
 
+class SegmentType(str, Enum):
+    BARCODES = "barcodes"
+    TIMING_MARKS = "timing marks"
+
+
 class ItemBlock(BaseModel):
     position: tuple[int, int]
     nrows: int
     nopts: int
     item_size: tuple[int, int]
     bubble_size: tuple[int, int]
-    orientation: BlockOrientation
-    block_type: BlockType
+    orientation: Optional[BlockOrientation] = BlockOrientation.HORIZONTAL
+    block_type: Optional[BlockType] = BlockType.MCQ
     labels: Optional[tuple[int, int]] = None
     bubble_labels: Optional[list[str]] = None
     color: Optional[str] = "#85c8ff"
@@ -50,6 +55,7 @@ class Segment(BaseModel):
     position: tuple[int, int]
     size: tuple[int, int]
     item_blocks: list[ItemBlock]
+    segment_type: SegmentType
 
 
 class BarcodesSegment(Segment):
@@ -64,5 +70,5 @@ class TimingMarksSegment(Segment):
 class Form(BaseModel):
     name: str
     page_size: tuple[int, int]
-    segments: list[Segment]
+    segments: list[BarcodesSegment | TimingMarksSegment]
     form_id: Barcode | ItemBlock

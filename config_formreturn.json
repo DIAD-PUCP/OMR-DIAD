@@ -1,0 +1,82 @@
+{
+  "name": "formreturn",
+  "page_size": [
+    1190,
+    1684
+  ],
+  "form_id": {
+    "position": [
+      0,
+      0
+    ],
+    "size": [
+      0,
+      0
+    ],
+    "text": ""
+  },
+  "segments": [
+    {
+      "segment_type": "barcodes",
+      "position": [
+        60,
+        550
+      ],
+      "size": [
+        1070,
+        1684
+      ],
+      "bottom_left": {
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          0,
+          0
+        ],
+        "text": "01"
+      },
+      "top_right": {
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          0,
+          0
+        ],
+        "text": "02"
+      },
+      "item_blocks": [
+        {
+          "position": [
+            95,
+            615
+          ],
+          "item_size": [
+            40,
+            36
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 25,
+          "nopts": 5,
+          "labels": [
+            1,
+            25
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ]
+        }
+      ]
+    }
+  ]
+}
