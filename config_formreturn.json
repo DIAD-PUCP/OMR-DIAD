@@ -24,7 +24,7 @@
       ],
       "size": [
         1070,
-        1684
+        1020
       ],
       "bottom_left": {
         "position": [
@@ -35,7 +35,7 @@
           0,
           0
         ],
-        "text": "01"
+        "text": "02"
       },
       "top_right": {
         "position": [
@@ -46,7 +46,7 @@
           0,
           0
         ],
-        "text": "02"
+        "text": "01"
       },
       "item_blocks": [
         {
