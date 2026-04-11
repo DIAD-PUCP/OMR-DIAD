@@ -2,9 +2,14 @@ import cv2
 import numpy as np
 import zxingcpp
 from cv2.typing import MatLike
-from PIL import Image
 
 from form import BarcodesSegment, Form
+
+
+def find_skew(
+    src_img: MatLike, bottom_left: zxingcpp.Barcode, top_right: zxingcpp.Barcode
+) -> float:
+    return 0
 
 
 def preprocess_image_barcodes(config: Form, src_img: MatLike) -> MatLike:
@@ -19,7 +24,9 @@ def preprocess_image_barcodes(config: Form, src_img: MatLike) -> MatLike:
     top_right = None
 
     blur_img = cv2.GaussianBlur(src_img, ksize=(3, 3), sigmaX=0)
-    barcodes = zxingcpp.read_barcodes(blur_img)
+    barcodes = zxingcpp.read_barcodes(
+        blur_img, try_rotate=False, formats=[zxingcpp.BarcodeFormat.Code128]
+    )
     for code in barcodes:
         if code.text == segment.bottom_left.text:
             bottom_left = code
@@ -30,8 +37,8 @@ def preprocess_image_barcodes(config: Form, src_img: MatLike) -> MatLike:
 
     if (bottom_left is None) or (top_right is None):
         raise RuntimeError("Segment barcodes not found")
-    skew = 0
-    Image.fromarray(blur_img[top_right.position.top_left.y :, :]).save("debug.png")
+
+    skew = find_skew(blur_img, bottom_left, top_right)
     rot_mat = cv2.getRotationMatrix2D((0, 0), -skew, 1)
 
     img = cv2.warpAffine(
