@@ -6,10 +6,30 @@ from cv2.typing import MatLike
 from form import BarcodesSegment, Form
 
 
-def find_skew(
-    src_img: MatLike, bottom_left: zxingcpp.Barcode, top_right: zxingcpp.Barcode
-) -> float:
-    return 0
+def find_skew(src_img: MatLike) -> tuple[float, float, float]:
+    gray = cv2.cvtColor(src_img, cv2.COLOR_RGB2GRAY)
+    _, img_bin = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    lines = cv2.HoughLinesP(
+        img_bin,
+        1,
+        np.pi / 360,
+        50,
+        minLineLength=src_img.shape[0] / 4,
+        maxLineGap=10,
+    )
+    angles = []
+    xs = []
+    ys = []
+    for line in lines:
+        x1, y1, x2, y2 = line[0]
+        xs.append(x1)
+        ys.append(y1)
+        angles.append(np.atan2(y2 - y1, x2 - x1))
+        cv2.line(src_img, (x1, y1), (x2, y2), (0, 255, 0), 1)
+    skew = np.median(angles)
+    x = np.median(xs)
+    y = np.median(ys)
+    return skew * 180 / np.pi, x, y
 
 
 def preprocess_image_barcodes(config: Form, src_img: MatLike) -> MatLike:
@@ -24,22 +44,8 @@ def preprocess_image_barcodes(config: Form, src_img: MatLike) -> MatLike:
     top_right = None
 
     blur_img = cv2.GaussianBlur(src_img, ksize=(3, 3), sigmaX=0)
-    barcodes = zxingcpp.read_barcodes(
-        blur_img, try_rotate=False, formats=[zxingcpp.BarcodeFormat.Code128]
-    )
-    for code in barcodes:
-        if code.text == segment.bottom_left.text:
-            bottom_left = code
-        elif code.text == segment.top_right.text:
-            top_right = code
-        else:
-            continue
-
-    if (bottom_left is None) or (top_right is None):
-        raise RuntimeError("Segment barcodes not found")
-
-    skew = find_skew(blur_img, bottom_left, top_right)
-    rot_mat = cv2.getRotationMatrix2D((0, 0), -skew, 1)
+    skew, x, y = find_skew(blur_img)
+    rot_mat = cv2.getRotationMatrix2D((x, y), skew, 1)
 
     img = cv2.warpAffine(
         src_img,
@@ -51,7 +57,9 @@ def preprocess_image_barcodes(config: Form, src_img: MatLike) -> MatLike:
     )
 
     blur_img = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=0)
-    barcodes = zxingcpp.read_barcodes(blur_img)
+    barcodes = zxingcpp.read_barcodes(
+        blur_img, try_rotate=False, formats=[zxingcpp.BarcodeFormat.Code128]
+    )
     for code in barcodes:
         if code.text == segment.bottom_left.text:
             bottom_left = code
