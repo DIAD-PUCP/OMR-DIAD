@@ -46,7 +46,6 @@ def find_skew_barcode(
         code_gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU
     )
     contours, _ = cv2.findContours(code_bin, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(code_img, contours, -1, (0, 255, 0), 1)
     first_x = code_bin.shape[1]
     last_x = 0
     first, last = None, None
