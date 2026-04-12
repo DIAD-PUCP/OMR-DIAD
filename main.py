@@ -18,7 +18,7 @@ def main(args):
 
     images = pdf2image.convert_from_path(fname)
     for i, img in enumerate(tqdm.tqdm(images)):
-        res = preprocess_image_barcodes(config, np.array(img))
+        res = preprocess_image_barcodes(config, np.array(img), deskew="barcodes")
         Image.fromarray(res).save(f"{i}.png")
 
 

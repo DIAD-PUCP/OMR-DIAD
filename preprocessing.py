@@ -32,7 +32,64 @@ def find_skew(src_img: MatLike) -> tuple[float, float, float]:
     return skew * 180 / np.pi, x, y
 
 
-def preprocess_image_barcodes(config: Form, src_img: MatLike) -> MatLike:
+def find_skew_barcode(
+    src_img: MatLike, code: zxingcpp.Barcode
+) -> tuple[float, float, float]:
+    width = code.position.top_right.x - code.position.bottom_left.x
+    pad = int(width / 10)
+    code_img = src_img[
+        code.position.top_left.y - pad : code.position.bottom_right.y + pad,
+        code.position.top_left.x - pad : code.position.bottom_right.x + pad,
+    ]
+    code_gray = cv2.cvtColor(code_img, cv2.COLOR_RGB2GRAY)
+    _, code_bin = cv2.threshold(
+        code_gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU
+    )
+    contours, _ = cv2.findContours(code_bin, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(code_img, contours, -1, (0, 255, 0), 1)
+    first_x = code_bin.shape[1]
+    last_x = 0
+    first, last = None, None
+    for c in contours:
+        rot_box = cv2.minAreaRect(c)
+        if rot_box[0][0] < first_x:
+            first_x = rot_box[0][0]
+            first = rot_box
+        if rot_box[0][0] > last_x:
+            last_x = rot_box[0][0]
+            last = rot_box
+    if not first or not last:
+        raise RuntimeError("Could not detect barcode skew")
+
+    first = np.array(first[0])
+    last = np.array(last[0])
+    vec = last - first
+    angle = np.atan2(vec[1], vec[0]) * 180 / np.pi
+    return (angle, first[0], last[0])
+
+
+def find_segment_barcodes(
+    img: MatLike, segment: BarcodesSegment
+) -> tuple[zxingcpp.Barcode, zxingcpp.Barcode]:
+    barcodes = zxingcpp.read_barcodes(
+        img, try_rotate=False, formats=[zxingcpp.BarcodeFormat.Code128]
+    )
+    for code in barcodes:
+        if code.text == segment.bottom_left.text:
+            bottom_left = code
+        elif code.text == segment.top_right.text:
+            top_right = code
+        else:
+            continue
+
+    if (bottom_left is None) or (top_right is None):
+        raise RuntimeError("Segment barcodes not found")
+    return (bottom_left, top_right)
+
+
+def preprocess_image_barcodes(
+    config: Form, src_img: MatLike, deskew: str = "lines"
+) -> MatLike:
     for s in config.segments:
         if isinstance(s, BarcodesSegment):
             segment = s
@@ -40,11 +97,14 @@ def preprocess_image_barcodes(config: Form, src_img: MatLike) -> MatLike:
     else:
         raise RuntimeError("No barcode segments in config")
 
-    bottom_left = None
-    top_right = None
-
     blur_img = cv2.GaussianBlur(src_img, ksize=(3, 3), sigmaX=0)
-    skew, x, y = find_skew(blur_img)
+
+    if deskew == "lines":
+        skew, x, y = find_skew(blur_img)
+    else:
+        bottom_left, top_right = find_segment_barcodes(blur_img, segment)
+        skew, x, y = find_skew_barcode(blur_img, bottom_left)
+
     rot_mat = cv2.getRotationMatrix2D((x, y), skew, 1)
 
     img = cv2.warpAffine(
@@ -57,19 +117,7 @@ def preprocess_image_barcodes(config: Form, src_img: MatLike) -> MatLike:
     )
 
     blur_img = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=0)
-    barcodes = zxingcpp.read_barcodes(
-        blur_img, try_rotate=False, formats=[zxingcpp.BarcodeFormat.Code128]
-    )
-    for code in barcodes:
-        if code.text == segment.bottom_left.text:
-            bottom_left = code
-        elif code.text == segment.top_right.text:
-            top_right = code
-        else:
-            continue
-
-    if (bottom_left is None) or (top_right is None):
-        raise RuntimeError("Segment barcodes not found")
+    bottom_left, top_right = find_segment_barcodes(blur_img, segment)
 
     bl = bottom_left.position.bottom_left
     tr = top_right.position.top_right
