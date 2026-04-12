@@ -103,7 +103,9 @@ def preprocess_image_barcodes(
         skew, x, y = find_skew(blur_img)
     else:
         bottom_left, top_right = find_segment_barcodes(blur_img, segment)
-        skew, x, y = find_skew_barcode(blur_img, bottom_left)
+        skew1, x, y = find_skew_barcode(blur_img, bottom_left)
+        skew2, _, _ = find_skew_barcode(blur_img, top_right)
+        skew = (skew1 + skew2) / 2
 
     rot_mat = cv2.getRotationMatrix2D((x, y), skew, 1)
 
