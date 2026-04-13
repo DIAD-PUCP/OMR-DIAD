@@ -1,4 +1,5 @@
 import sys
+from itertools import chain
 
 import numpy as np
 import pdf2image
@@ -19,6 +20,7 @@ def main(args):
         config = Form.model_validate_json(json_config)
 
     images = pdf2image.convert_from_path(fname)
+    results = []
     for i, img in enumerate(tqdm.tqdm(images)):
         try:
             image = np.array(img)
@@ -29,10 +31,18 @@ def main(args):
             Image.fromarray(res).save(f"outputs/{formid}({i}).png")
             debug = debug_img(config, res, prob, ans)
             Image.fromarray(debug).save(f"debug/{formid}({i}).png")
+            results.append([str(formid)] + list(chain.from_iterable(ans)))
         except RuntimeError as e:
             print(e)
             Image.fromarray(image).save(f"errors/{fname.split('/')[-1]}({i}).png")
             continue
+    r = []
+    for ficha in results:
+        line = []
+        for _, el in enumerate(ficha):
+            line.append(f'"{el}"')
+        r.append(",".join(line))
+    print("\n".join(sorted(r)))
 
 
 if __name__ == "__main__":
