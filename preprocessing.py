@@ -36,7 +36,7 @@ def find_skew_barcode(
     src_img: MatLike, code: zxingcpp.Barcode
 ) -> tuple[float, float, float]:
     width = code.position.top_right.x - code.position.bottom_left.x
-    pad = int(width / 10)
+    pad = int(width / 20)
     code_img = src_img[
         code.position.top_left.y - pad : code.position.bottom_right.y + pad,
         code.position.top_left.x - pad : code.position.bottom_right.x + pad,
@@ -45,7 +45,7 @@ def find_skew_barcode(
     _, code_bin = cv2.threshold(
         code_gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU
     )
-    contours, _ = cv2.findContours(code_bin, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(code_bin, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     first_x = code_bin.shape[1]
     last_x = 0
     first, last = None, None
@@ -73,6 +73,8 @@ def find_segment_barcodes(
     barcodes = zxingcpp.read_barcodes(
         img, try_rotate=False, formats=[zxingcpp.BarcodeFormat.Code128]
     )
+    bottom_left = None
+    top_right = None
     for code in barcodes:
         if code.text == segment.bottom_left.text:
             bottom_left = code

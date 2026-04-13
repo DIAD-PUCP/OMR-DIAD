@@ -20,14 +20,19 @@ def main(args):
 
     images = pdf2image.convert_from_path(fname)
     for i, img in enumerate(tqdm.tqdm(images)):
-        image = np.array(img)
-        res = preprocess_image_barcodes(config, image, deskew="barcodes")
-        formid = find_barcode_id(config, image)
-        marks = read_bubbles(config, res)
-        ans, prob = process_mcq_marks(config, marks)
-        Image.fromarray(res).save(f"{formid}({i}).png")
-        debug = debug_img(config, res, prob, ans)
-        Image.fromarray(debug).save(f"debug_{formid}({i}).png")
+        try:
+            image = np.array(img)
+            res = preprocess_image_barcodes(config, image, deskew="barcodes")
+            formid = find_barcode_id(config, image)
+            marks = read_bubbles(config, res)
+            ans, prob = process_mcq_marks(config, marks)
+            Image.fromarray(res).save(f"outputs/{formid}({i}).png")
+            debug = debug_img(config, res, prob, ans)
+            Image.fromarray(debug).save(f"debug/{formid}({i}).png")
+        except RuntimeError as e:
+            print(e)
+            Image.fromarray(image).save(f"errors/{fname.split('/')[-1]}({i}).png")
+            continue
 
 
 if __name__ == "__main__":
