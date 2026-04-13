@@ -75,6 +75,87 @@
             "D",
             "E"
           ]
+        },
+        {
+          "position": [
+            300,
+            68
+          ],
+          "item_size": [
+            40,
+            36
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 25,
+          "nopts": 5,
+          "labels": [
+            26,
+            50
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ]
+        },
+        {
+          "position": [
+            576,
+            68
+          ],
+          "item_size": [
+            40,
+            36
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 25,
+          "nopts": 5,
+          "labels": [
+            51,
+            75
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ]
+        },
+        {
+          "position": [
+            854,
+            68
+          ],
+          "item_size": [
+            40,
+            36
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 25,
+          "nopts": 5,
+          "labels": [
+            76,
+            100
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ]
         }
       ]
     }
