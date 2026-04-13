@@ -2,8 +2,9 @@ import cv2
 import numpy as np
 import zxingcpp
 from cv2.typing import MatLike
+from numpy.typing import NDArray
 
-from form import BarcodesSegment, Form
+from form import BarcodesSegment, Form, TimingMarksSegment
 
 
 def find_skew(src_img: MatLike) -> tuple[float, float, float]:
@@ -65,6 +66,66 @@ def find_skew_barcode(
     vec = last - first
     angle = np.atan2(vec[1], vec[0]) * 180 / np.pi
     return (angle, first[0], last[0])
+
+
+def find_timing_marks(
+    timing_area: MatLike,
+    marker_area_limits: tuple[float, float],
+    aspect_ratio_limits: tuple[float, float],
+    is_skewed: bool = True,
+) -> NDArray:
+    min_area, max_area = marker_area_limits
+    min_ar, max_ar = aspect_ratio_limits
+    inv_min_ar = 1 / max_ar
+    inv_max_ar = 1 / min_ar
+    gray = cv2.cvtColor(timing_area, cv2.COLOR_RGB2GRAY)
+    _, img_bin = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    contours, _ = cv2.findContours(img_bin, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    rects = []
+    for c in contours:
+        area = cv2.contourArea(c, oriented=True)
+        if min_area < area < max_area:
+            if is_skewed:
+                r = cv2.minAreaRect(c)
+                rect = np.array([r[0][0], r[0][1], r[1][0], r[1][1]])
+            else:
+                rect = np.array(cv2.boundingRect(c))
+            ar = rect[2] / rect[3]
+            if (min_ar < ar < max_ar) or (inv_min_ar < ar < inv_max_ar):
+                rects.append(rect)
+    return np.sort(rects, axis=0)
+
+
+def find_skew_timing_marks(timing_marks: NDArray) -> tuple[float, float, float]:
+    first = timing_marks[0]
+    last = timing_marks[-1]
+    vec = last[:2] - first[:2]
+    angle = np.atan2(vec[1], vec[0]) * 180 / np.pi
+    return (angle, first[0], first[2])
+
+
+def find_segment_top(src_img: MatLike) -> float:
+    # We calculate the height using the frame of the litho
+    top = round(src_img.shape[0] * 0.1)
+    img = src_img[:top, :]
+    _, img_bin = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    nonzero = np.nonzero(img_bin[:top, :])
+    top_start = np.min(nonzero[0])
+    left_start = np.min(nonzero[1])
+    # skip 1% of top and keep 20% middle to ignore borders
+    pad = np.ceil(np.array(src_img.shape) * np.array([0.01, 0.75])).astype(np.int64)
+    image_top = img_bin[
+        top_start + pad[0] : top,
+        left_start + round(pad[1] / 2) : img_bin.shape[1] - round(pad[1] / 2),
+    ]
+    extra_pad = np.argmax(np.mean(image_top.astype(float), axis=1) >= 254)
+    y1 = (
+        top_start
+        + pad[0]
+        + extra_pad
+        + np.argmax(np.mean(image_top[extra_pad:, :].astype(float), axis=1) < 250)
+    )  # first slightly black line
+    return y1
 
 
 def find_segment_barcodes(
@@ -129,6 +190,91 @@ def preprocess_image_barcodes(
     segment_height = bl.y - tr.y
     scale_factor = np.array(segment.size) / np.array([segment_width, segment_height])
     position = np.array([bl.x, tr.y])
+    offset = np.array(segment.position) - (position * scale_factor)
+    img = cv2.resize(
+        img,
+        None,
+        fx=scale_factor[0],
+        fy=scale_factor[1],
+        interpolation=cv2.INTER_LINEAR,
+    )
+
+    tmat = np.array([[1, 0, offset[0]], [0, 1, offset[1]]], dtype=np.float32)
+    img = cv2.warpAffine(
+        img,
+        tmat,
+        dsize=(img.shape[1], img.shape[0]),
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=(255, 255, 255, 255),
+    )
+
+    img = cv2.copyMakeBorder(
+        img, 0, 50, 0, 50, cv2.BORDER_CONSTANT, value=(255, 255, 255, 255)
+    )
+    img = img[0 : config.page_size[1], 0 : config.page_size[0]]
+
+    return img
+
+
+def preprocess_image_timing_marks(
+    config: Form, src_img: MatLike, deskew: str = "lines"
+) -> MatLike:
+    for s in config.segments:
+        if isinstance(s, TimingMarksSegment):
+            segment = s
+            break
+    else:
+        raise RuntimeError("No barcode segments in config")
+
+    blur_img = cv2.GaussianBlur(src_img, ksize=(3, 3), sigmaX=0)
+    # Must implement a more robust timing area detection
+    # Now it asumes is the bottom 10% of image
+    timing_start = round(src_img.shape[0] * 0.90)
+    timing_area = blur_img[timing_start:, :]
+    img_area = src_img.shape[0] * src_img.shape[1]
+    marker_area_limits = (img_area * 15 / 100_000, img_area * 30 / 100_000)
+    aspect_ratio_limits = (0.3, 0.6)
+    # Must implement a more robust timing mark detection,
+    # now it calculates black boxes within some area and aspect ratio limits
+    timing_marks = find_timing_marks(
+        timing_area, marker_area_limits, aspect_ratio_limits
+    )
+
+    if deskew == "lines":
+        skew, x, y = find_skew(blur_img)
+    else:
+        skew, x, y = find_skew_timing_marks(timing_marks)
+
+    rot_mat = cv2.getRotationMatrix2D((x, y + timing_start), skew, 1)
+
+    img = cv2.warpAffine(
+        src_img,
+        rot_mat,
+        (src_img.shape[1], src_img.shape[0]),
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=0,
+        flags=cv2.INTER_LANCZOS4,
+    )
+
+    # Timing marks are recalculated on rotated image
+    blur_img = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=0)
+    timing_start = round(img.shape[0] * 0.90)
+    timing_area = blur_img[timing_start:, :]
+    timing_marks = find_timing_marks(
+        timing_area, marker_area_limits, aspect_ratio_limits, is_skewed=False
+    )
+
+    median_width = np.median(timing_marks, axis=2)
+    median_height = np.median(timing_marks, axis=3)
+    median_y = np.median(timing_marks, axis=1)
+    min_x = np.min(timing_marks, axis=0)
+    segment_width = timing_marks[-1][0] - timing_marks[0][0] + median_width
+    end_y = round(timing_start + median_y + median_height)
+    start_y = find_segment_top(blur_img)
+    segment_height = end_y - start_y
+
+    scale_factor = np.array(segment.size) / np.array([segment_width, segment_height])
+    position = np.array([min_x, start_y])
     offset = np.array(segment.position) - (position * scale_factor)
     img = cv2.resize(
         img,
