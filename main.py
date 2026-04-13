@@ -23,7 +23,7 @@ def main(args):
         image = np.array(img)
         res = preprocess_image_barcodes(config, image, deskew="barcodes")
         formid = find_barcode_id(config, image)
-        marks = read_bubbles(config, image)
+        marks = read_bubbles(config, res)
         Image.fromarray(res).save(f"{formid}({i}).png")
         debug = debug_img(config, res, marks)
         Image.fromarray(debug).save(f"debug_{formid}({i}).png")
