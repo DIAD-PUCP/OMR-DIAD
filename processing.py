@@ -44,7 +44,7 @@ def debug_img(
 
 
 def process_mcq_marks(
-    config: Form, marks: list[MatLike]
+    config: Form, marks: list[MatLike], threshold: float = 1.0
 ) -> tuple[list[MatLike], list[MatLike]]:
     k = 0
     answers = []
@@ -66,7 +66,7 @@ def process_mcq_marks(
             )
             area = cv2.countNonZero(area)
             odds = np.round(marks[k] / (area - marks[k] + 1), 1)
-            ans = odds > 1.0
+            ans = odds >= threshold
             ans = np.strings.multiply(
                 np.array(block.bubble_labels), ans.astype(np.int8)
             )
