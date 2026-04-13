@@ -8,7 +8,7 @@ from PIL import Image
 from form import Form
 from form_id import find_barcode_id
 from preprocessing import preprocess_image_barcodes
-from processing import debug_img, read_bubbles
+from processing import debug_img, process_mcq_marks, read_bubbles
 
 
 def main(args):
@@ -24,8 +24,9 @@ def main(args):
         res = preprocess_image_barcodes(config, image, deskew="barcodes")
         formid = find_barcode_id(config, image)
         marks = read_bubbles(config, res)
+        ans, prob = process_mcq_marks(config, marks)
         Image.fromarray(res).save(f"{formid}({i}).png")
-        debug = debug_img(config, res, marks)
+        debug = debug_img(config, res, prob, ans)
         Image.fromarray(debug).save(f"debug_{formid}({i}).png")
 
 

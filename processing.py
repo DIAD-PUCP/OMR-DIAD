@@ -1,12 +1,13 @@
 import cv2
 import numpy as np
 from cv2.typing import MatLike
-from PIL import Image
 
 from form import Form
 
 
-def debug_img(config: Form, src_img: MatLike, values=list[MatLike]) -> MatLike:
+def debug_img(
+    config: Form, src_img: MatLike, values: list[MatLike], answers: list[MatLike]
+) -> MatLike:
     k = 0
     for segment in config.segments:
         position = np.array(segment.position)
@@ -28,15 +29,59 @@ def debug_img(config: Form, src_img: MatLike, values=list[MatLike]) -> MatLike:
                         thickness=1,
                         lineType=cv2.LINE_AA,
                     )
+                src_img = cv2.putText(
+                    src_img,
+                    answers[k][j],
+                    (pos0[0] + round(size[0] * 1.1), pos0[1] + round(size[1] * 0.65)),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    fontScale=0.5,
+                    color=(0, 0, 255, 255),
+                    thickness=1,
+                    lineType=cv2.LINE_AA,
+                )
             k = k + 1
     return src_img
+
+
+def process_mcq_marks(
+    config: Form, marks: list[MatLike]
+) -> tuple[list[MatLike], list[MatLike]]:
+    k = 0
+    answers = []
+    probabilities = []
+    for segment in config.segments:
+        for block in segment.item_blocks:
+            size = np.array(block.item_size)
+            bubble = np.array(block.bubble_size)
+            area = np.zeros((size[1], size[0]), dtype=np.uint8)
+            area = cv2.ellipse(
+                area,
+                (round(size[0] / 2), round(size[1] / 2)),
+                (round(bubble[0] / 2), round(bubble[1] / 2)),
+                0,
+                0,
+                360,
+                255,
+                -1,
+            )
+            area = cv2.countNonZero(area)
+            odds = np.round(marks[k] / (area - marks[k] + 1), 1)
+            ans = odds > 1.0
+            ans = np.strings.multiply(
+                np.array(block.bubble_labels), ans.astype(np.int8)
+            )
+            ans = (",".join(filter(lambda x: x != "", a)) for a in ans)
+            ans = np.array([" " if a == "" else a for a in ans])
+            probabilities.append(odds)
+            answers.append(ans)
+            k = k + 1
+    return (answers, probabilities)
 
 
 def read_bubbles(config: Form, src_img: MatLike) -> list[MatLike]:
     blur = cv2.GaussianBlur(src_img, ksize=(3, 3), sigmaX=0)
     gray = cv2.cvtColor(blur, cv2.COLOR_RGB2GRAY)
     _, img = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    Image.fromarray(img).save("debug.png")
     results = []
     for segment in config.segments:
         position = np.array(segment.position)
