@@ -101,7 +101,7 @@ def find_skew_timing_marks(timing_marks: NDArray) -> tuple[float, float, float]:
     last = timing_marks[np.argmax(timing_marks[:, 0])]
     vec = last[:2] - first[:2]
     angle = np.atan2(vec[1], vec[0]) * 180 / np.pi
-    return (-angle, first[0], first[1])
+    return (angle, first[0], first[1])
 
 
 def find_segment_top(src_img: MatLike) -> float:
