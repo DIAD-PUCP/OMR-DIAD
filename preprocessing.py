@@ -153,7 +153,7 @@ def find_segment_barcodes(
 
 
 def preprocess_image_barcodes(
-    config: Form, src_img: MatLike, deskew: str = "lines"
+    config: Form, src_img: MatLike, deskew: str = "barcodes"
 ) -> MatLike:
     for s in config.segments:
         if isinstance(s, BarcodesSegment):
@@ -220,7 +220,7 @@ def preprocess_image_barcodes(
 
 
 def preprocess_image_timing_marks(
-    config: Form, src_img: MatLike, deskew: str = "lines"
+    config: Form, src_img: MatLike, deskew: str = "timing_marks"
 ) -> MatLike:
     for s in config.segments:
         if isinstance(s, TimingMarksSegment):
