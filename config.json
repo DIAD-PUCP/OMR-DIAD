@@ -48,8 +48,8 @@
       "item_blocks": [
         {
           "position": [
-            427,
-            43
+            499,
+            13
           ],
           "item_size": [
             25,
@@ -64,6 +64,58 @@
           "labels": [
             1,
             30
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ]
+        },
+        {
+          "position": [
+            727,
+            13
+          ],
+          "item_size": [
+            25,
+            25
+          ],
+          "bubble_size": [
+            18,
+            18
+          ],
+          "nrows": 30,
+          "nopts": 4,
+          "labels": [
+            31,
+            60
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ]
+        },
+        {
+          "position": [
+            981,
+            13
+          ],
+          "item_size": [
+            25,
+            25
+          ],
+          "bubble_size": [
+            18,
+            18
+          ],
+          "nrows": 16,
+          "nopts": 4,
+          "labels": [
+            61,
+            76
           ],
           "bubble_labels": [
             "A",
