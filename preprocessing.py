@@ -236,7 +236,7 @@ def preprocess_image_timing_marks(
     timing_area = blur_img[timing_start:, :]
     img_area = src_img.shape[0] * src_img.shape[1]
     marker_area_limits = (img_area * 15 / 100_000, img_area * 30 / 100_000)
-    aspect_ratio_limits = (0.3, 0.6)
+    aspect_ratio_limits = (0.3, 0.5)
     # Must implement a more robust timing mark detection,
     # now it calculates black boxes within some area and aspect ratio limits
     timing_marks = find_timing_marks(
