@@ -227,7 +227,7 @@ def preprocess_image_timing_marks(
             segment = s
             break
     else:
-        raise RuntimeError("No barcode segments in config")
+        raise RuntimeError("No Timing Marks segments in config")
 
     blur_img = cv2.GaussianBlur(src_img, ksize=(3, 3), sigmaX=0)
     # Must implement a more robust timing area detection
