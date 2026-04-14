@@ -93,12 +93,12 @@ def find_timing_marks(
             ar = rect[2] / rect[3]
             if (min_ar < ar < max_ar) or (inv_min_ar < ar < inv_max_ar):
                 rects.append(rect)
-    return np.sort(rects, axis=0)
+    return np.array(rects)
 
 
 def find_skew_timing_marks(timing_marks: NDArray) -> tuple[float, float, float]:
-    first = timing_marks[0]
-    last = timing_marks[-1]
+    first = timing_marks[np.argmin(timing_marks[:, 0])]
+    last = timing_marks[np.argmax(timing_marks[:, 0])]
     vec = last[:2] - first[:2]
     angle = np.atan2(vec[1], vec[0]) * 180 / np.pi
     return (-angle, first[0], first[1])
@@ -267,10 +267,11 @@ def preprocess_image_timing_marks(
         timing_area, marker_area_limits, aspect_ratio_limits, is_skewed=False
     )
     start_x = np.min(timing_marks[:, 0])
+    end_x = np.max(timing_marks[:, 0])
     median_y = np.median(timing_marks[:, 1])
     median_width = np.median(timing_marks[:, 2])
     median_height = np.median(timing_marks[:, 3])
-    segment_width = timing_marks[-1][0] - timing_marks[0][0] + median_width
+    segment_width = end_x - start_x + median_width
     end_y = round(timing_start + median_y + median_height)
     start_y = find_segment_top(blur_img)
     segment_height = end_y - start_y
