@@ -1,0 +1,78 @@
+{
+  "name": "8465X",
+  "page_size": [
+    1240,
+    874
+  ],
+  "form_id": {
+    "item_size": [
+      25,
+      25
+    ],
+    "bubble_size": [
+      18,
+      18
+    ],
+    "position": [
+      427,
+      43
+    ],
+    "block_type": "BIN",
+    "nrows": 30,
+    "nopts": 1,
+    "color": "#85c8ff",
+    "opacity": 0.5
+  },
+  "segments": [
+    {
+      "segment_type": "timing marks",
+      "timing_marks": {
+        "count": 44,
+        "size": [
+          10,
+          25
+        ],
+        "position": [
+          85,
+          850
+        ]
+      },
+      "position": [
+        80,
+        30
+      ],
+      "size": [
+        1100,
+        814
+      ],
+      "item_blocks": [
+        {
+          "position": [
+            427,
+            43
+          ],
+          "item_size": [
+            25,
+            25
+          ],
+          "bubble_size": [
+            18,
+            18
+          ],
+          "nrows": 30,
+          "nopts": 4,
+          "labels": [
+            1,
+            30
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ]
+        }
+      ]
+    }
+  ]
+}

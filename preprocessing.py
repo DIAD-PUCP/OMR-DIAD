@@ -101,19 +101,22 @@ def find_skew_timing_marks(timing_marks: NDArray) -> tuple[float, float, float]:
     last = timing_marks[-1]
     vec = last[:2] - first[:2]
     angle = np.atan2(vec[1], vec[0]) * 180 / np.pi
-    return (angle, first[0], first[2])
+    return (-angle, first[0], first[1])
 
 
 def find_segment_top(src_img: MatLike) -> float:
     # We calculate the height using the frame of the litho
     top = round(src_img.shape[0] * 0.1)
     img = src_img[:top, :]
-    _, img_bin = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    _, img_bin = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     nonzero = np.nonzero(img_bin[:top, :])
     top_start = np.min(nonzero[0])
     left_start = np.min(nonzero[1])
     # skip 1% of top and keep 20% middle to ignore borders
-    pad = np.ceil(np.array(src_img.shape) * np.array([0.01, 0.75])).astype(np.int64)
+    pad = np.ceil(np.array(src_img.shape[:-1]) * np.array([0.01, 0.75])).astype(
+        np.int64
+    )
     image_top = img_bin[
         top_start + pad[0] : top,
         left_start + round(pad[1] / 2) : img_bin.shape[1] - round(pad[1] / 2),
@@ -263,18 +266,17 @@ def preprocess_image_timing_marks(
     timing_marks = find_timing_marks(
         timing_area, marker_area_limits, aspect_ratio_limits, is_skewed=False
     )
-
-    median_width = np.median(timing_marks, axis=2)
-    median_height = np.median(timing_marks, axis=3)
-    median_y = np.median(timing_marks, axis=1)
-    min_x = np.min(timing_marks, axis=0)
+    start_x = np.min(timing_marks[:, 0])
+    median_y = np.median(timing_marks[:, 1])
+    median_width = np.median(timing_marks[:, 2])
+    median_height = np.median(timing_marks[:, 3])
     segment_width = timing_marks[-1][0] - timing_marks[0][0] + median_width
     end_y = round(timing_start + median_y + median_height)
     start_y = find_segment_top(blur_img)
     segment_height = end_y - start_y
 
     scale_factor = np.array(segment.size) / np.array([segment_width, segment_height])
-    position = np.array([min_x, start_y])
+    position = np.array([start_x, start_y])
     offset = np.array(segment.position) - (position * scale_factor)
     img = cv2.resize(
         img,
