@@ -82,7 +82,7 @@ def read_bubbles(config: Form, src_img: MatLike) -> list[MatLike]:
     image = src_img
     if config.contrast != 1.0:
         image = cv2.convertScaleAbs(image, alpha=config.contrast, beta=0.0)
-    blur = cv2.GaussianBlur(image, ksize=(3, 3), sigmaX=0)
+    blur = cv2.medianBlur(image, ksize=5)
     gray = cv2.cvtColor(blur, cv2.COLOR_RGB2GRAY)
     _, img = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     results = []
