@@ -72,4 +72,5 @@ class Form(BaseModel):
     page_size: tuple[int, int]
     segments: list[BarcodesSegment | TimingMarksSegment]
     form_id: Barcode | ItemBlock
-    contrast: float = 1.0
+    contrast: int = 0
+    brightness: int = 0

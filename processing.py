@@ -5,6 +5,33 @@ from cv2.typing import MatLike
 from form import Form
 
 
+def apply_brightness_contrast(
+    input_img: MatLike, brightness: int, contrast: int
+) -> MatLike:
+    if brightness != 0:
+        if brightness > 0:
+            shadow = brightness
+            highlight = 255
+        else:
+            shadow = 0
+            highlight = 255 + brightness
+        alpha_b = (highlight - shadow) / 255
+        gamma_b = shadow
+
+        buf = cv2.addWeighted(input_img, alpha_b, input_img, 0, gamma_b)
+    else:
+        buf = input_img.copy()
+
+    if contrast != 0:
+        f = 131 * (contrast + 127) / (127 * (131 - contrast))
+        alpha_c = f
+        gamma_c = 127 * (1 - f)
+
+        buf = cv2.addWeighted(buf, alpha_c, buf, 0, gamma_c)
+
+    return buf
+
+
 def debug_img(
     config: Form, src_img: MatLike, values: list[MatLike], answers: list[MatLike]
 ) -> MatLike:
@@ -79,9 +106,7 @@ def process_mcq_marks(
 
 
 def read_bubbles(config: Form, src_img: MatLike) -> list[MatLike]:
-    image = src_img
-    if config.contrast != 1.0:
-        image = cv2.convertScaleAbs(image, alpha=config.contrast, beta=0.0)
+    image = apply_brightness_contrast(src_img, config.brightness, config.contrast)
     blur = cv2.medianBlur(image, ksize=5)
     gray = cv2.cvtColor(blur, cv2.COLOR_RGB2GRAY)
     _, img = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
