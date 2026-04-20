@@ -71,7 +71,7 @@ def debug_img(
 
 
 def process_mcq_marks(
-    config: Form, marks: list[MatLike], threshold: float = 1.0
+    config: Form, marks: list[MatLike]
 ) -> tuple[list[MatLike], list[MatLike]]:
     k = 0
     answers = []
@@ -93,7 +93,7 @@ def process_mcq_marks(
             )
             area = cv2.countNonZero(area)
             odds = np.round(marks[k] / (area - marks[k] + 1), 1)
-            ans = odds >= threshold
+            ans = odds >= config.threshold
             ans = np.strings.multiply(
                 np.array(block.bubble_labels), ans.astype(np.int8)
             )
@@ -109,7 +109,10 @@ def read_bubbles(config: Form, src_img: MatLike) -> list[MatLike]:
     image = apply_brightness_contrast(src_img, config.brightness, config.contrast)
     blur = cv2.medianBlur(image, ksize=5)
     gray = cv2.cvtColor(blur, cv2.COLOR_RGB2GRAY)
-    _, img = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    if config.luminance is None:
+        _, img = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    else:
+        _, img = cv2.threshold(gray, config.luminance, 255, cv2.THRESH_BINARY_INV)
     results = []
     for segment in config.segments:
         position = np.array(segment.position)

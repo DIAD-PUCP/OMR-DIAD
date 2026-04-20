@@ -1,10 +1,12 @@
 {
   "name": "8465X",
+  "luminance": 200,
+  "contrast": 20,
+  "threshold": 2.0,
   "page_size": [
     1240,
     874
   ],
-  "contrast": 1.2,
   "form_id": {
     "item_size": [
       25,
