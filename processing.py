@@ -93,7 +93,9 @@ def process_mcq_marks(
             )
             area = cv2.countNonZero(area)
             odds = np.round(marks[k] / (area - marks[k] + 1), 1)
-            ans = odds >= config.threshold
+            ans = (odds > (np.max(odds, axis=1, keepdims=True) / 2)) & (
+                odds >= config.threshold
+            )
             ans = np.strings.multiply(
                 np.array(block.bubble_labels), ans.astype(np.int8)
             )
