@@ -19,7 +19,7 @@ def main(args):
         json_config = f.read()
         config = Form.model_validate_json(json_config)
 
-    images = pdf2image.convert_from_path(fname)
+    images = pdf2image.convert_from_path(fname, fmt="jpeg", thread_count=8)
     results = []
     for i, img in enumerate(tqdm.tqdm(images)):
         try:
