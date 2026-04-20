@@ -1,8 +1,13 @@
+from itertools import chain
+
 import cv2
 import numpy as np
 from cv2.typing import MatLike
+from PIL import Image
 
-from form import Form
+from form import Barcode, Form, ItemBlock
+from form_id import find_barcode_id, find_itemblock_id
+from preprocessing import preprocess_image_barcodes, preprocess_image_timing_marks
 
 
 def apply_brightness_contrast(
@@ -143,3 +148,20 @@ def read_bubbles(config: Form, src_img: MatLike) -> list[MatLike]:
                     counts[j, i] = cv2.countNonZero(aoi)
             results.append(counts)
     return results
+
+
+def process_form(config: Form, image: MatLike) -> list[str]:
+    if isinstance(config.form_id, Barcode):
+        res = preprocess_image_barcodes(config, image)
+        formid = find_barcode_id(config, image)
+    elif isinstance(config.form_id, ItemBlock):
+        res = preprocess_image_timing_marks(config, image)
+        formid = find_itemblock_id(config, res)
+    else:
+        raise RuntimeError("Form ID not valid")
+    marks = read_bubbles(config, res)
+    ans, prob = process_mcq_marks(config, marks)
+    Image.fromarray(res).save(f"outputs/{formid}.png")
+    debug = debug_img(config, res, prob, ans)
+    Image.fromarray(debug).save(f"debug/{formid}.png")
+    return [str(formid)] + list(chain.from_iterable(ans))
