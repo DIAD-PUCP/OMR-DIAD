@@ -5,7 +5,7 @@ import numpy as np
 from cv2.typing import MatLike
 from PIL import Image
 
-from form import Barcode, Form, ItemBlock
+from form import Barcode, Form, ItemBlock, OutputFormat
 from form_id import find_barcode_id, find_itemblock_id
 from preprocessing import preprocess_image_barcodes, preprocess_image_timing_marks
 
@@ -165,3 +165,22 @@ def process_form(
     debug = debug_img(config, res, prob, ans)
     Image.fromarray(debug).save(f"{debug_dir}/{formid}.png")
     return [str(formid)] + list(chain.from_iterable(ans))
+
+
+def format_output(config: Form, results: list[list[str]], format: OutputFormat) -> str:
+    res = []
+    if format == OutputFormat.DAT:
+        for ficha in results:
+            line = []
+            for i, el in enumerate(ficha):
+                if i > 0 and len(el) > 1:
+                    line.append("*")
+                else:
+                    line.append(el)
+            res.append("".join(line))
+        return "\n".join(sorted(res))
+    else:
+        for ficha in results:
+            res.append(",".join([f'"{el}"' for el in ficha]))
+        header = ",".join([f'"{col}"' for col in config.get_header()])
+        return header + "\n" + "\n".join(sorted(res))

@@ -9,8 +9,8 @@ import pdf2image
 import tqdm
 import typer
 
-from form import Form
-from processing import process_form
+from form import Form, OutputFormat
+from processing import format_output, process_form
 
 app = typer.Typer()
 
@@ -38,6 +38,7 @@ def main(
     debug_dir: Annotated[
         Path, typer.Option(file_okay=False, exists=True, writable=True)
     ] = Path("debug"),
+    output_format: Annotated[OutputFormat, typer.Option()] = OutputFormat.CSV,
 ):
     with open(config_file) as f:
         json_config = f.read()
@@ -58,16 +59,8 @@ def main(
         for data in tqdm.tqdm(images):
             results.append(proc_img(data))
 
-    r = []
-    print(",".join(config.get_header()))
-    for ficha in results:
-        if ficha is None:
-            continue
-        line = []
-        for _, el in enumerate(ficha):
-            line.append(f'"{el}"')
-        r.append(",".join(line))
-    print("\n".join(sorted(r)))
+    output = format_output(config, results, output_format)
+    print(output)
 
 
 if __name__ == "__main__":

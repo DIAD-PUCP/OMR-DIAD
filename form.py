@@ -4,6 +4,11 @@ from typing import Optional
 from pydantic import BaseModel
 
 
+class OutputFormat(str, Enum):
+    CSV = "csv"
+    DAT = "dat"
+
+
 class Striped(str, Enum):
     EVEN = "even"
     ODD = "odd"
