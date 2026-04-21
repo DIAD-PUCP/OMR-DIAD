@@ -12,5 +12,6 @@ dependencies = [
     "pydantic>=2.12.5",
     "pypdf>=6.9.2",
     "tqdm>=4.67.3",
+    "typer>=0.24.1",
     "zxing-cpp>=3.0.0",
 ]

@@ -1,13 +1,16 @@
 import sys
 from multiprocessing import Pool
-from typing import Optional
+from typing import Annotated, Optional
 
 import numpy as np
 import pdf2image
 import tqdm
+import typer
 
 from form import Form
 from processing import process_form
+
+app = typer.Typer()
 
 
 def proc_img(data) -> Optional[list[str]]:
@@ -20,9 +23,11 @@ def proc_img(data) -> Optional[list[str]]:
         return None
 
 
-def main(args):
-    config_file = args[1]
-    fname = args[2]
+@app.command()
+def main(
+    config_file: Annotated[str, typer.Argument()],
+    fname: Annotated[str, typer.Argument()],
+):
     with open(config_file) as f:
         json_config = f.read()
         config = Form.model_validate_json(json_config)
@@ -45,5 +50,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
-    exit(0)
+    app()
