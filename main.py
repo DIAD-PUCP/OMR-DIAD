@@ -8,6 +8,7 @@ import numpy as np
 import pdf2image
 import tqdm
 import typer
+from PIL import Image
 
 from form import Form, OutputFormat
 from processing import format_output, process_form
@@ -16,12 +17,13 @@ app = typer.Typer()
 
 
 def proc_img(data) -> Optional[list[str]]:
-    config, image, out, debug = data
+    i, fname, config, image, out, debug, error = data
     try:
         result = process_form(config, image, output_dir=out, debug_dir=debug)
         return result
     except RuntimeError as e:
         print(e, file=sys.stderr)
+        Image.fromarray(image).save(f"{error}/({i + 1})_{fname}")
         return None
 
 
@@ -38,6 +40,9 @@ def main(
     debug_dir: Annotated[
         Path, typer.Option(file_okay=False, exists=True, writable=True)
     ] = Path("debug"),
+    error_dir: Annotated[
+        Path, typer.Option(file_okay=False, exists=True, writable=True)
+    ] = Path("errors"),
     output_format: Annotated[OutputFormat, typer.Option()] = OutputFormat.CSV,
 ):
     with open(config_file) as f:
@@ -45,9 +50,9 @@ def main(
         config = Form.model_validate_json(json_config)
     n_threads = os.cpu_count() or 1
     images = [
-        (config, np.array(img), out_dir, debug_dir)
-        for img in pdf2image.convert_from_path(
-            fname, fmt="jpeg", thread_count=n_threads
+        (i, fname, config, np.array(img), out_dir, debug_dir, error_dir)
+        for i, img in enumerate(
+            pdf2image.convert_from_path(fname, fmt="jpeg", thread_count=n_threads)
         )
     ]
 
