@@ -1,4 +1,6 @@
 import sys
+from multiprocessing import Pool
+from typing import Optional
 
 import numpy as np
 import pdf2image
@@ -6,6 +8,16 @@ import tqdm
 
 from form import Form
 from processing import process_form
+
+
+def proc_img(data) -> Optional[list[str]]:
+    config, image, out, debug = data
+    try:
+        result = process_form(config, image, output_dir=out, debug_dir=debug)
+        return result
+    except RuntimeError as e:
+        print(e, file=sys.stderr)
+        return None
 
 
 def main(args):
@@ -16,21 +28,15 @@ def main(args):
         config = Form.model_validate_json(json_config)
 
     images = [
-        np.array(img)
+        (config, np.array(img), "outputs", "debug")
         for img in pdf2image.convert_from_path(fname, fmt="jpeg", thread_count=8)
     ]
-    results = []
-    for image in tqdm.tqdm(images):
-        try:
-            result = process_form(
-                config, image, output_dir="outputs", debug_dir="debug"
-            )
-            results.append(result)
-        except RuntimeError as e:
-            print(e)
-            continue
+    with Pool() as p:
+        results = list(tqdm.tqdm(p.imap(proc_img, images), total=len(images)))
     r = []
     for ficha in results:
+        if ficha is None:
+            continue
         line = []
         for _, el in enumerate(ficha):
             line.append(f'"{el}"')
