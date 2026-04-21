@@ -22,7 +22,9 @@ def main(args):
     results = []
     for image in tqdm.tqdm(images):
         try:
-            result = process_form(config, image)
+            result = process_form(
+                config, image, output_dir="outputs", debug_dir="debug"
+            )
             results.append(result)
         except RuntimeError as e:
             print(e)
