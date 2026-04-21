@@ -74,5 +74,5 @@ class Form(BaseModel):
     form_id: Barcode | ItemBlock
     contrast: int = 0
     brightness: int = 0
-    threshold: float = 4.0
+    threshold: float = 0.4
     luminance: Optional[int] = None
