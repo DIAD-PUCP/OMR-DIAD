@@ -19,7 +19,13 @@ app = typer.Typer()
 def proc_img(data) -> Optional[list[str]]:
     i, fname, config, image, out, debug, error = data
     try:
-        result = process_form(config, image, output_dir=out, debug_dir=debug)
+        result = process_form(
+            config,
+            image,
+            output_dir=out,
+            debug_dir=debug,
+            extra={"filename": fname, "page_num": i + 1},
+        )
         return result
     except RuntimeError as e:
         print(e, file=sys.stderr)

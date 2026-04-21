@@ -76,7 +76,7 @@ def debug_img(
 
 
 def process_mcq_marks(
-    config: Form, marks: list[MatLike]
+    config: Form, marks: list[MatLike], greys: list[MatLike]
 ) -> tuple[list[MatLike], list[MatLike]]:
     k = 0
     answers = []
@@ -97,8 +97,8 @@ def process_mcq_marks(
                 -1,
             )
             area = cv2.countNonZero(area)
-            odds = np.round(marks[k] / (area - marks[k] + 1), 1)
-            ans = (odds > (np.max(odds, axis=1, keepdims=True) / 2)) & (
+            odds = np.round((greys[k] / 255) * marks[k] / (area - marks[k] + 1), 1)
+            ans = (odds > (np.max(odds, axis=1, keepdims=True) * 2 / 3)) & (
                 odds >= config.threshold
             )
             ans = np.strings.multiply(
@@ -112,7 +112,7 @@ def process_mcq_marks(
     return (answers, probabilities)
 
 
-def read_bubbles(config: Form, src_img: MatLike) -> list[MatLike]:
+def read_bubbles(config: Form, src_img: MatLike) -> tuple[list[MatLike], list[MatLike]]:
     image = apply_brightness_contrast(src_img, config.brightness, config.contrast)
     blur = cv2.medianBlur(image, ksize=5)
     gray = cv2.cvtColor(blur, cv2.COLOR_RGB2GRAY)
@@ -121,10 +121,12 @@ def read_bubbles(config: Form, src_img: MatLike) -> list[MatLike]:
     else:
         _, img = cv2.threshold(gray, config.luminance, 255, cv2.THRESH_BINARY_INV)
     results = []
+    results_grey = []
     for segment in config.segments:
         position = np.array(segment.position)
         for block in segment.item_blocks:
             counts = np.zeros(shape=(block.nrows, block.nopts), dtype=np.uint16)
+            counts_grey = np.zeros(shape=(block.nrows, block.nopts), dtype=np.float64)
             start = position + np.array(block.position)
             size = np.array(block.item_size)
             bubble = np.array(block.bubble_size)
@@ -144,14 +146,21 @@ def read_bubbles(config: Form, src_img: MatLike) -> list[MatLike]:
                     pos0 = start + np.array([i, j]) * size
                     pos1 = pos0 + size
                     aoi = img[pos0[1] : pos1[1], pos0[0] : pos1[0]]
+                    aoi_gray = gray[pos0[1] : pos1[1], pos0[0] : pos1[0]]
+                    counts_grey[j, i] = 255 - cv2.mean(aoi_gray, mask=mask)[0]
                     aoi = cv2.bitwise_and(aoi, aoi, mask=mask)
                     counts[j, i] = cv2.countNonZero(aoi)
             results.append(counts)
-    return results
+            results_grey.append(counts_grey)
+    return (results, results_grey)
 
 
 def process_form(
-    config: Form, image: MatLike, output_dir: str = ".", debug_dir: str = "."
+    config: Form,
+    image: MatLike,
+    output_dir: str = ".",
+    debug_dir: str = ".",
+    extra: dict = {},
 ) -> list[str]:
     if isinstance(config.form_id, Barcode):
         res = preprocess_image_barcodes(config, image)
@@ -159,11 +168,15 @@ def process_form(
     elif isinstance(config.form_id, ItemBlock):
         res = preprocess_image_timing_marks(config, image)
         formid = find_itemblock_id(config, res)
-    marks = read_bubbles(config, res)
-    ans, prob = process_mcq_marks(config, marks)
-    Image.fromarray(res).save(f"{output_dir}/{formid}.png")
+    marks, greys = read_bubbles(config, res)
+    ans, prob = process_mcq_marks(config, marks, greys)
+    Image.fromarray(res).save(
+        f"{output_dir}/{formid} ({extra['filename'].name} {extra['page_num']}).png"
+    )
     debug = debug_img(config, res, prob, ans)
-    Image.fromarray(debug).save(f"{debug_dir}/{formid}.png")
+    Image.fromarray(debug).save(
+        f"{debug_dir}/{formid} ({extra['filename'].name} {extra['page_num']}).png"
+    )
     return [str(formid)] + list(chain.from_iterable(ans))
 
 
