@@ -28,10 +28,16 @@ def proc_img(data) -> Optional[list[str]]:
 @app.command()
 def main(
     fname: Annotated[Path, typer.Argument()],
-    config_file: Annotated[Path, typer.Option()],
+    config_file: Annotated[
+        Path, typer.Option(dir_okay=False, readable=True, exists=True)
+    ],
     single_process: Annotated[bool, typer.Option()] = False,
-    out_dir: Annotated[Path, typer.Option()] = Path("outputs"),
-    debug_dir: Annotated[Path, typer.Option()] = Path("debug"),
+    out_dir: Annotated[
+        Path, typer.Option(file_okay=False, exists=True, writable=True)
+    ] = Path("outputs"),
+    debug_dir: Annotated[
+        Path, typer.Option(file_okay=False, exists=True, writable=True)
+    ] = Path("debug"),
 ):
     with open(config_file) as f:
         json_config = f.read()
