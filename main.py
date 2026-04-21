@@ -53,6 +53,7 @@ def main(
             results.append(proc_img(data))
 
     r = []
+    print(",".join(config.get_header()))
     for ficha in results:
         if ficha is None:
             continue

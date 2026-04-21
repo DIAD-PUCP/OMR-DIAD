@@ -32,6 +32,7 @@ class ItemBlock(BaseModel):
     bubble_size: tuple[int, int]
     orientation: Optional[BlockOrientation] = BlockOrientation.HORIZONTAL
     block_type: Optional[BlockType] = BlockType.MCQ
+    label_prefix: str = "item"
     labels: Optional[tuple[int, int]] = None
     bubble_labels: Optional[list[str]] = None
     color: Optional[str] = "#85c8ff"
@@ -76,3 +77,15 @@ class Form(BaseModel):
     brightness: int = 0
     threshold: float = 0.4
     luminance: Optional[int] = None
+
+    def get_header(self) -> list[str]:
+        header = ["ID"]
+        for segment in self.segments:
+            for ib in segment.item_blocks:
+                if ib.labels is None:
+                    labels = (1, ib.nrows)
+                else:
+                    labels = ib.labels
+                for i in range(labels[0], labels[1] + 1):
+                    header.append(f"{ib.label_prefix}{i}")
+        return header
