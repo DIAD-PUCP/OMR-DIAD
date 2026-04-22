@@ -1,5 +1,5 @@
-import os
 import sys
+from io import BytesIO
 from multiprocessing import Pool
 from pathlib import Path
 from typing import Annotated, Optional
@@ -9,6 +9,7 @@ import pdf2image
 import tqdm
 import typer
 from PIL import Image
+from pypdf import PdfReader
 
 from form import Form, OutputFormat
 from processing import format_output, process_form
@@ -33,6 +34,14 @@ def proc_img(data) -> Optional[list[str]]:
         return None
 
 
+def read_images(pdf_path: Path, convert_image: bool = False) -> list[Image.Image]:
+    if not convert_image:
+        reader = PdfReader(pdf_path)
+        return [Image.open(BytesIO(page.images[0].data)) for page in reader.pages]
+    else:
+        return pdf2image.convert_from_path(pdf_path, fmt="jpeg")
+
+
 @app.command()
 def main(
     fname: Annotated[Path, typer.Argument()],
@@ -40,6 +49,7 @@ def main(
         Path, typer.Option(dir_okay=False, readable=True, exists=True)
     ],
     single_process: Annotated[bool, typer.Option()] = False,
+    convert: Annotated[bool, typer.Option()] = False,
     out_dir: Annotated[
         Path, typer.Option(file_okay=False, exists=True, writable=True)
     ] = Path("outputs"),
@@ -54,12 +64,10 @@ def main(
     with open(config_file) as f:
         json_config = f.read()
         config = Form.model_validate_json(json_config)
-    n_threads = os.cpu_count() or 1
+    images = read_images(fname, convert)
     images = [
         (i, fname, config, np.array(img), out_dir, debug_dir, error_dir)
-        for i, img in enumerate(
-            pdf2image.convert_from_path(fname, fmt="jpeg", thread_count=n_threads)
-        )
+        for i, img in enumerate(images)
     ]
 
     if not single_process:

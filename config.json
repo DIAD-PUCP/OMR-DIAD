@@ -1,7 +1,6 @@
 {
   "name": "8465X",
   "threshold": 1.0,
-  "luminance": 200,
   "page_size": [
     1240,
     874
