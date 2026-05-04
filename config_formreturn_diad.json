@@ -1,0 +1,159 @@
+{
+  "name": "formreturn",
+  "page_size": [
+    962,
+    1240
+  ],
+  "form_id": {
+    "position": [
+      58,
+      426
+    ],
+    "size": [
+      602,
+      48
+    ],
+    "text": ""
+  },
+  "segments": [
+    {
+      "segment_type": "barcodes",
+      "position": [
+        38,
+        400
+      ],
+      "size": [
+        880,
+        800
+      ],
+      "bottom_left": {
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          0,
+          0
+        ],
+        "text": "02"
+      },
+      "top_right": {
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          0,
+          0
+        ],
+        "text": "01"
+      },
+      "item_blocks": [
+        {
+          "position": [
+            35,
+            70
+          ],
+          "item_size": [
+            42,
+            36
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 19,
+          "nopts": 4,
+          "labels": [
+            1,
+            19
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ]
+        },
+        {
+          "position": [
+            257,
+            70
+          ],
+          "item_size": [
+            42,
+            36
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 19,
+          "nopts": 4,
+          "labels": [
+            20,
+            38
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ]
+        },
+        {
+          "position": [
+            478,
+            70
+          ],
+          "item_size": [
+            42,
+            36
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 19,
+          "nopts": 4,
+          "labels": [
+            39,
+            57
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ]
+        },
+        {
+          "position": [
+            700,
+            70
+          ],
+          "item_size": [
+            42,
+            36
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 19,
+          "nopts": 4,
+          "labels": [
+            58,
+            76
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ]
+        }
+      ]
+    }
+  ]
+}
