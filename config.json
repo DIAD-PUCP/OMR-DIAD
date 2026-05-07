@@ -1,6 +1,6 @@
 {
   "name": "8465X",
-  "threshold": 1.0,
+  "threshold": 0.2,
   "page_size": [
     1240,
     874

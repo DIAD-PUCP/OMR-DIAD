@@ -97,8 +97,11 @@ def process_mcq_marks(
                 -1,
             )
             area = cv2.countNonZero(area)
-            odds = np.round((greys[k] / 255) * marks[k] / (area - marks[k] + 1), 1)
-            ans = (odds > (np.max(odds, axis=1, keepdims=True) * 2 / 3)) & (
+            odds = np.round(
+                (greys[k] / 128) * marks[k] / np.maximum(area - marks[k], 1),
+                1,
+            )
+            ans = (odds > (np.mean(odds, axis=1, keepdims=True) * 7 / 4)) & (
                 odds >= config.threshold
             )
             ans = np.strings.multiply(
@@ -125,7 +128,7 @@ def read_bubbles(config: Form, src_img: MatLike) -> tuple[list[MatLike], list[Ma
     for segment in config.segments:
         position = np.array(segment.position)
         for block in segment.item_blocks:
-            counts = np.zeros(shape=(block.nrows, block.nopts), dtype=np.uint16)
+            counts = np.zeros(shape=(block.nrows, block.nopts), dtype=np.intp)
             counts_grey = np.zeros(shape=(block.nrows, block.nopts), dtype=np.float64)
             start = position + np.array(block.position)
             size = np.array(block.item_size)
@@ -134,7 +137,7 @@ def read_bubbles(config: Form, src_img: MatLike) -> tuple[list[MatLike], list[Ma
             mask = cv2.ellipse(
                 mask,
                 (round(size[0] / 2), round(size[1] / 2)),
-                (round(bubble[0] / 2), round(bubble[1] / 2)),
+                (round(bubble[0] / 2) + 1, round(bubble[1] / 2) + 1),
                 0,
                 0,
                 360,
