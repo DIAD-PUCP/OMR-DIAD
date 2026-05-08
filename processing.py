@@ -76,7 +76,7 @@ def debug_img(
 
 
 def process_mcq_marks(
-    config: Form, marks: list[MatLike], greys: list[MatLike]
+    config: Form, marks: list[MatLike], greys: list[MatLike], weighted: list[MatLike]
 ) -> tuple[list[MatLike], list[MatLike]]:
     k = 0
     answers = []
@@ -97,10 +97,7 @@ def process_mcq_marks(
                 -1,
             )
             area = cv2.countNonZero(area)
-            odds = np.round(
-                (greys[k] / 128) * marks[k] / np.maximum(area - marks[k], 1),
-                1,
-            )
+            odds = np.round(weighted[k] / area, 3)
             ans = (odds > (np.mean(odds, axis=1, keepdims=True) * 7 / 4)) & (
                 odds >= config.threshold
             )
@@ -115,7 +112,9 @@ def process_mcq_marks(
     return (answers, probabilities)
 
 
-def read_bubbles(config: Form, src_img: MatLike) -> tuple[list[MatLike], list[MatLike]]:
+def read_bubbles(
+    config: Form, src_img: MatLike
+) -> tuple[list[MatLike], list[MatLike], list[MatLike]]:
     image = apply_brightness_contrast(src_img, config.brightness, config.contrast)
     blur = cv2.medianBlur(image, ksize=5)
     gray = cv2.cvtColor(blur, cv2.COLOR_RGB2GRAY)
@@ -125,11 +124,13 @@ def read_bubbles(config: Form, src_img: MatLike) -> tuple[list[MatLike], list[Ma
         _, img = cv2.threshold(gray, config.luminance, 255, cv2.THRESH_BINARY_INV)
     results = []
     results_grey = []
+    results_weighted = []
     for segment in config.segments:
         position = np.array(segment.position)
         for block in segment.item_blocks:
             counts = np.zeros(shape=(block.nrows, block.nopts), dtype=np.intp)
             counts_grey = np.zeros(shape=(block.nrows, block.nopts), dtype=np.float64)
+            counts_w = np.zeros(shape=(block.nrows, block.nopts), dtype=np.float64)
             start = position + np.array(block.position)
             size = np.array(block.item_size)
             bubble = np.array(block.bubble_size)
@@ -137,7 +138,7 @@ def read_bubbles(config: Form, src_img: MatLike) -> tuple[list[MatLike], list[Ma
             mask = cv2.ellipse(
                 mask,
                 (round(size[0] / 2), round(size[1] / 2)),
-                (round(bubble[0] / 2) + 1, round(bubble[1] / 2) + 1),
+                (round(bubble[0] / 2), round(bubble[1] / 2)),
                 0,
                 0,
                 360,
@@ -150,12 +151,15 @@ def read_bubbles(config: Form, src_img: MatLike) -> tuple[list[MatLike], list[Ma
                     pos1 = pos0 + size
                     aoi = img[pos0[1] : pos1[1], pos0[0] : pos1[0]]
                     aoi_gray = gray[pos0[1] : pos1[1], pos0[0] : pos1[0]]
+                    aoi_weight = (mask * aoi) * (255 - aoi_gray) / 255
+                    counts_w[j, i] = cv2.sumElems(aoi_weight)[0]
                     counts_grey[j, i] = 255 - cv2.mean(aoi_gray, mask=mask)[0]
                     aoi = cv2.bitwise_and(aoi, aoi, mask=mask)
                     counts[j, i] = cv2.countNonZero(aoi)
             results.append(counts)
+            results_weighted.append(counts_w)
             results_grey.append(counts_grey)
-    return (results, results_grey)
+    return (results, results_grey, results_weighted)
 
 
 def process_form(
@@ -171,8 +175,8 @@ def process_form(
     elif isinstance(config.form_id, ItemBlock):
         res = preprocess_image_timing_marks(config, image)
         formid = find_itemblock_id(config, res)
-    marks, greys = read_bubbles(config, res)
-    ans, prob = process_mcq_marks(config, marks, greys)
+    marks, greys, weighted = read_bubbles(config, res)
+    ans, prob = process_mcq_marks(config, marks, greys, weighted)
     Image.fromarray(res).save(
         f"{output_dir}/{formid} ({extra['filename'].name} {extra['page_num']}).png"
     )
