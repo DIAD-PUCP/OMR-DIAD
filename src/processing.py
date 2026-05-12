@@ -8,6 +8,7 @@ from PIL import Image
 from form import Barcode, Form, ItemBlock, OutputFormat
 from form_id import find_barcode_id, find_itemblock_id
 from preprocessing import preprocess_image_barcodes, preprocess_image_timing_marks
+from recognition import calculate_values, detect_selected_answer
 
 
 def apply_brightness_contrast(
@@ -76,7 +77,7 @@ def debug_img(
 
 
 def process_mcq_marks(
-    config: Form, marks: list[MatLike], greys: list[MatLike], weighted: list[MatLike]
+    config: Form, marks: list[MatLike]
 ) -> tuple[list[MatLike], list[MatLike]]:
     k = 0
     answers = []
@@ -97,10 +98,7 @@ def process_mcq_marks(
                 -1,
             )
             area = cv2.countNonZero(area)
-            odds = np.round(weighted[k] / area, 3)
-            ans = (odds > (np.mean(odds, axis=1, keepdims=True) * 7 / 4)) & (
-                odds >= config.threshold
-            )
+            odds, ans = detect_selected_answer(marks[k], area, config.threshold)
             ans = np.strings.multiply(
                 np.array(block.bubble_labels), ans.astype(np.int8)
             )
@@ -112,9 +110,7 @@ def process_mcq_marks(
     return (answers, probabilities)
 
 
-def read_bubbles(
-    config: Form, src_img: MatLike
-) -> tuple[list[MatLike], list[MatLike], list[MatLike]]:
+def read_bubbles(config: Form, src_img: MatLike) -> list[MatLike]:
     image = apply_brightness_contrast(src_img, config.brightness, config.contrast)
     blur = cv2.medianBlur(image, ksize=5)
     gray = cv2.cvtColor(blur, cv2.COLOR_RGB2GRAY)
@@ -123,14 +119,10 @@ def read_bubbles(
     else:
         _, img = cv2.threshold(gray, config.luminance, 255, cv2.THRESH_BINARY_INV)
     results = []
-    results_grey = []
-    results_weighted = []
     for segment in config.segments:
         position = np.array(segment.position)
         for block in segment.item_blocks:
-            counts = np.zeros(shape=(block.nrows, block.nopts), dtype=np.intp)
-            counts_grey = np.zeros(shape=(block.nrows, block.nopts), dtype=np.float64)
-            counts_w = np.zeros(shape=(block.nrows, block.nopts), dtype=np.float64)
+            res = np.zeros(shape=(block.nrows, block.nopts), dtype=np.float64)
             start = position + np.array(block.position)
             size = np.array(block.item_size)
             bubble = np.array(block.bubble_size)
@@ -151,15 +143,9 @@ def read_bubbles(
                     pos1 = pos0 + size
                     aoi = img[pos0[1] : pos1[1], pos0[0] : pos1[0]]
                     aoi_gray = gray[pos0[1] : pos1[1], pos0[0] : pos1[0]]
-                    aoi_weight = (mask * aoi) * (255 - aoi_gray) / 255
-                    counts_w[j, i] = cv2.sumElems(aoi_weight)[0]
-                    counts_grey[j, i] = 255 - cv2.mean(aoi_gray, mask=mask)[0]
-                    aoi = cv2.bitwise_and(aoi, aoi, mask=mask)
-                    counts[j, i] = cv2.countNonZero(aoi)
-            results.append(counts)
-            results_weighted.append(counts_w)
-            results_grey.append(counts_grey)
-    return (results, results_grey, results_weighted)
+                    res[j, i] = calculate_values(aoi, aoi_gray, mask)
+            results.append(res)
+    return results
 
 
 def process_form(
@@ -175,8 +161,8 @@ def process_form(
     elif isinstance(config.form_id, ItemBlock):
         res = preprocess_image_timing_marks(config, image)
         formid = find_itemblock_id(config, res)
-    marks, greys, weighted = read_bubbles(config, res)
-    ans, prob = process_mcq_marks(config, marks, greys, weighted)
+    marks = read_bubbles(config, res)
+    ans, prob = process_mcq_marks(config, marks)
     Image.fromarray(res).save(
         f"{output_dir}/{formid} ({extra['filename'].name} {extra['page_num']}).png"
     )
