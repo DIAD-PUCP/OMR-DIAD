@@ -44,7 +44,7 @@ def read_images(pdf_path: Path, convert_image: bool = False) -> list[Image.Image
 
 @app.command()
 def main(
-    fname: Annotated[Path, typer.Argument()],
+    fnames: Annotated[list[Path], typer.Argument()],
     config_file: Annotated[
         Path, typer.Option(dir_okay=False, readable=True, exists=True)
     ],
@@ -64,22 +64,24 @@ def main(
     with open(config_file) as f:
         json_config = f.read()
         config = Form.model_validate_json(json_config)
-    images = read_images(fname, convert)
-    images = [
-        (i, fname, config, np.array(img), out_dir, debug_dir, error_dir)
-        for i, img in enumerate(images)
-    ]
 
-    if not single_process:
-        with Pool() as p:
-            results = list(tqdm.tqdm(p.imap(proc_img, images), total=len(images)))
-    else:
-        results = []
-        for data in tqdm.tqdm(images):
-            results.append(proc_img(data))
+    for fname in fnames:
+        images = read_images(fname, convert)
+        images = [
+            (i, fname, config, np.array(img), out_dir, debug_dir, error_dir)
+            for i, img in enumerate(images)
+        ]
 
-    output = format_output(config, results, output_format)
-    print(output)
+        if not single_process:
+            with Pool() as p:
+                results = list(tqdm.tqdm(p.imap(proc_img, images), total=len(images)))
+        else:
+            results = []
+            for data in tqdm.tqdm(images):
+                results.append(proc_img(data))
+
+        output = format_output(config, results, output_format)
+        print(output)
 
 
 if __name__ == "__main__":
