@@ -73,3 +73,34 @@ def test_form_diad(subtests):
         with subtests.test("DIAD test forms", name=f"test10.pdf ({data[0] + 1})"):
             res = proc_img(data)
             assert result == res
+
+
+def test_formreturn_diad(subtests):
+    with open("./sample_configs/config_formreturn_diad.json") as f:
+        json_config = f.read()
+        config = Form.model_validate_json(json_config)
+    with open("./tests/test2.csv") as csvfile:
+        reader = csv.reader(csvfile)
+        results = [row for row in reader]
+    images = read_images(Path("./inputs/calibracion.pdf"), True)
+    out_dir = TemporaryDirectory()
+    debug_dir = TemporaryDirectory()
+    error_dir = TemporaryDirectory()
+    images = [
+        (
+            i,
+            Path("calibracion.pdf"),
+            config,
+            np.array(img),
+            out_dir.name,
+            debug_dir.name,
+            error_dir.name,
+        )
+        for i, img in enumerate(images)
+    ]
+    for data, result in zip(images, results):
+        with subtests.test(
+            "DIAD test formreturn forms", name=f"calibracion.pdf ({data[0] + 1})"
+        ):
+            res = proc_img(data)
+            assert result == res
