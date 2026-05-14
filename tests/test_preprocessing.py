@@ -1,4 +1,11 @@
-from src.form import Barcode, Form, ItemBlock
+import csv
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+import numpy as np
+
+from form import Barcode, Form, ItemBlock
+from main import proc_img, read_images
 
 
 def test_config_load(subtests):
@@ -39,5 +46,30 @@ def test_config_header(subtests):
             ]
 
 
-def test_form_diad():
-    assert True
+def test_form_diad(subtests):
+    with open("./sample_configs/config.json") as f:
+        json_config = f.read()
+        config = Form.model_validate_json(json_config)
+    with open("./tests/test3.csv") as csvfile:
+        reader = csv.reader(csvfile)
+        results = [row for row in reader]
+    images = read_images(Path("./inputs/test3.pdf"), False)
+    out_dir = TemporaryDirectory()
+    debug_dir = TemporaryDirectory()
+    error_dir = TemporaryDirectory()
+    images = [
+        (
+            i,
+            Path("test10.pdf"),
+            config,
+            np.array(img),
+            out_dir.name,
+            debug_dir.name,
+            error_dir.name,
+        )
+        for i, img in enumerate(images)
+    ]
+    for data, result in zip(images, results):
+        with subtests.test("DIAD test forms", name=f"test10.pdf ({data[0] + 1})"):
+            res = proc_img(data)
+            assert result == res
