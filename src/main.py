@@ -12,9 +12,28 @@ from PIL import Image
 from pypdf import PdfReader
 
 from form import Form, OutputFormat
+from generate import draw_form
 from processing import format_output, process_form
 
 app = typer.Typer()
+
+
+@app.command()
+def generate_template(
+    config_file: Annotated[
+        Path, typer.Option(dir_okay=False, readable=True, exists=True)
+    ],
+    decorations_file: Annotated[
+        Path, typer.Option(dir_okay=False, readable=True, exists=True)
+    ],
+):
+    with open(config_file) as f:
+        json_config = f.read()
+        config = Form.model_validate_json(json_config)
+    with open(decorations_file) as f:
+        decorations = f.read()
+    form = draw_form(config, decorations)
+    print(form)
 
 
 def proc_img(data) -> Optional[list[str]]:
@@ -43,7 +62,7 @@ def read_images(pdf_path: Path, convert_image: bool = False) -> list[Image.Image
 
 
 @app.command()
-def main(
+def process(
     fnames: Annotated[list[Path], typer.Argument()],
     config_file: Annotated[
         Path, typer.Option(dir_okay=False, readable=True, exists=True)
