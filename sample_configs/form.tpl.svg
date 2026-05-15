@@ -1,0 +1,14 @@
+<svg height="{{config.page_size[1]}}" width="config.page_size[0]" xmlns="http://www.w3.org/2000/svg">
+  <rect fill="white" height="config.page_size[1]" width="config.page_size[0]"></rect>
+  <!-- {% for seg in config.segments %} -->
+  <g class="segment" transform="translate({{seg.position[0]}} {{seg.position[1]}})">
+    <!-- {% for block in seg.item_blocks %} -->
+    <g class="item-block" transform="translate({{block.position[0]}} {{block.position[1]}})">
+      <!-- {% for j in range(nrows))%} -->
+      <g class="item" transform="translate(0 {{j * block.item_size[1]}})"></g>
+      <!-- {% endfor %} -->
+    </g>
+    <!-- {% endfor %} -->
+  </g>
+  <!-- {% endfor %} -->
+</svg>
