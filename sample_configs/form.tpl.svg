@@ -1,14 +1,26 @@
 <svg height="{{config.page_size[1]}}" width="config.page_size[0]" xmlns="http://www.w3.org/2000/svg">
   <rect fill="white" height="config.page_size[1]" width="config.page_size[0]"></rect>
-  <!-- {% for seg in config.segments %} -->
+  {% for seg in config.segments %}
   <g class="segment" transform="translate({{seg.position[0]}} {{seg.position[1]}})">
-    <!-- {% for block in seg.item_blocks %} -->
+    {% for block in seg.item_blocks %}
+    {% set labels_range = seg.item_blocks.labels %}
+    {% set labels = range(labels_range[0],labels_range[1]+1) %}
+    {% set size_h = block.items_size[1] %}
+    {% set size_w = block.items_size[0] %}
+    {% set bsize_h = block.bubble_size[1] %}
+    {% set bsize_w = block.bubble_size[0] %}
     <g class="item-block" transform="translate({{block.position[0]}} {{block.position[1]}})">
-      <!-- {% for j in range(nrows))%} -->
-      <g class="item" transform="translate(0 {{j * block.item_size[1]}})"></g>
-      <!-- {% endfor %} -->
+      {% for j in range(block.nrows)) %}
+      <g class="item" transform="translate(0 {{j * block.item_size[1]}})">
+        <text dominant-baseline="central" font-family="Arial" font-size="13" text-anchor="end" x="-3" y="{{size_h/2}}">{{labels[j]}}</text>
+        {% for i in range(block.nopts) %}
+        <circle cx="{{i*size_w + (size_w/2)}}" cy="{{size_h/2" fill="white" id="item-1-A" r="bsize_h" stroke="black" stroke-width="1.5"></circle>
+        <text dominant-baseline="central" font-family="Arial light" font-size="11" font-weight="100" stroke="black" text-anchor="middle" x="{{i*size_w + (size_w/2)}}" y="{{size_h/2}}">A</text>
+        {% endfor %}
+      </g>
+      {% endfor %}
     </g>
-    <!-- {% endfor %} -->
+    {% endfor %}
   </g>
-  <!-- {% endfor %} -->
+  {% endfor %}
 </svg>
