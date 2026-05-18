@@ -7,33 +7,43 @@
       fill: #85c8ff;
       opacity: 0.4;
     }
+    #form-id .item{
+      fill: transparent;
+    }
+    #form-id .bubble{
+      stroke-width: 1;
+    }
     .item-label{
       dominant-baseline: central;
       font-family: Arial;
       font-size: 13px;
       text-anchor:end;
-      stroke: black;
     }
     .bubble{
       fill: white;
       stroke: #85c8ff;
       stroke-width:1.5;
+      opacity: 1;
     }
     .bubble-label{
       dominant-baseline: central;
-      font-family: "Arial light";
+      font-family: "Arial";
       font-size: 11px;
       font-weight:100;
       stroke: none;
       fill: #85c8ff;
       text-anchor: middle;
+      opacity: 1;
+    }
+    .timing-mark{
+      fill: black;
     }
   </style>
   <rect fill="white" height="{{config.page_size[1]}}" width="{{config.page_size[0]}}"></rect>
   {% for seg in config.segments %}
   <g class="segment" transform="translate({{seg.position[0]}} {{seg.position[1]}})">
     {% for block in seg.item_blocks %}
-    {% set k = loop %}
+    {% set k = loop.index %}
     {% set labels = range(block.labels[0],block.labels[1]+1) %}
     {% if block.bubble_labels is defined %}{% set blabels = block.bubble_labels %}{% else %}{% set blabels = range(1,block.nopts +1)%}{% endif %}
     {% set size_w,size_h = block.item_size %}
@@ -42,7 +52,7 @@
       {% for j in range(block.nrows) %}
       <g transform="translate(0 {{j * size_w}})">
         <rect class="item {{ loop.cycle('odd', 'even') }}" width="{{block.nopts * size_w}}" height="{{size_h}}"></rect>
-        <text class="item-label" x="-3" y="{{size_h/2}}">{{labels[j]}}</text>
+        <text class="item-label" x="-3" y="{{size_h/2}}">{{labels[j]}}.</text>
         {% for i in range(block.nopts) %}
         <circle class="bubble" cx="{{i*size_w + (size_w/2)}}" cy="{{size_h/2}}" id="item-{{j}}-{{i}}" r="{{bsize_h/2}}"></circle>
         <text class="bubble-label" x="{{i*size_w + (size_w/2)}}" y="{{size_h/2}}">{{blabels[i]}}</text>
@@ -51,6 +61,25 @@
       {% endfor %}
     </g>
     {% endfor %}
+    <g class="timing-marks" transform="translate(0 {{seg.size[1]-seg.timing_marks.size[1]}})">
+    {% set dist = (seg.size[0] - seg.timing_marks.size[0])/(seg.timing_marks.count - 1) %}
+    {% for i in range(seg.timing_marks.count) %}
+      <rect class="timing-mark" x="{{i * dist}}" y="0" width="{{seg.timing_marks.size[0]}}" height="{{seg.timing_marks.size[1]}}"></rect>
+    {% endfor %}
+    </g>
   </g>
   {% endfor %}
+  <g class="item-block" id="form-id" transform="translate({{config.form_id.position[0]}} {{config.form_id.position[1]}})">
+    {% set size_w,size_h = config.form_id.item_size %}
+    {% for j in range(config.form_id.nrows) %}
+    {% set bsize_w,bsize_h = config.form_id.bubble_size %}
+    <g transform="translate(0 {{j * size_w}})">
+      <rect class="item {{ loop.cycle('odd', 'even') }}" width="{{config.form_id.nopts * size_w}}" height="{{size_h}}"></rect>
+      {% for i in range(config.form_id.nopts) %}
+      <circle class="bubble" cx="{{i*size_w + (size_w/2)}}" cy="{{size_h/2}}" id="item-{{j}}-{{i}}" r="{{bsize_h/2}}"></circle>
+      {% endfor %}
+    </g>
+    {% endfor %}
+  </g>
+  {{ decorations }}
 </svg>
