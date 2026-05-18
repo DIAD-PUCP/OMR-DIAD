@@ -51,7 +51,7 @@
     <g class="item-block" id="block-{{k}}" transform="translate({{block.position[0]}} {{block.position[1]}})">
       {% for j in range(block.nrows) %}
       <g transform="translate(0 {{j * size_w}})">
-        <rect class="item {{ loop.cycle('odd', 'even') }}" width="{{block.nopts * size_w}}" height="{{size_h}}"></rect>
+        <rect class="item {{ loop.cycle('odd', 'even') }}" x="{{ (-size_w) }}" width="{{(block.nopts+1) * size_w}}" height="{{size_h}}"></rect>
         <text class="item-label" x="-3" y="{{size_h/2}}">{{labels[j]}}.</text>
         {% for i in range(block.nopts) %}
         <circle class="bubble" cx="{{i*size_w + (size_w/2)}}" cy="{{size_h/2}}" id="item-{{j}}-{{i}}" r="{{bsize_h/2}}"></circle>
@@ -81,5 +81,5 @@
     </g>
     {% endfor %}
   </g>
-  {{ decorations }}
+  {{ decorations | safe }}
 </svg>

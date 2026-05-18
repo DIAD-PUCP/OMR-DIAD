@@ -10,4 +10,4 @@ def draw_form(config: Form, decorations: Optional[str] = None) -> str:
         autoescape=True,
     )
     tpl = jinja_env.get_template("form.tpl.svg")
-    return tpl.render(config=config)
+    return tpl.render(config=config,decorations=decorations)
