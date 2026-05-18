@@ -38,6 +38,9 @@
     .timing-mark{
       fill: black;
     }
+    .border-guides{
+      stroke: #85c8ff;
+    }
   </style>
   <rect fill="white" height="{{config.page_size[1]}}" width="{{config.page_size[0]}}"></rect>
   {% for seg in config.segments %}
@@ -82,4 +85,16 @@
     {% endfor %}
   </g>
   {{ decorations | safe }}
+  <g class="border-guides">
+    {% set n = 3 %}
+    {% set N = (n*2)+1 %}
+    {% set w = config.page_size[0]/N %}
+    {% set h = config.page_size[1]/N %}
+    {% for i in range(n) %}
+      <line x1="{{ w +2*i*w }}" y1="1" x2="{{ w+ ((2*i)+1)*w }}" y2="1"></line>
+      <line x1="{{ w +2*i*w }}" y1="{{config.page_size[1]-1}}" x2="{{ w+ ((2*i)+1)*w }}" y2="{{config.page_size[1]-1}}"></line>
+      <line x1="1" y1="{{ h+ 2*i*h }}" x2="1" y2="{{h+ ((2*i)+1)*h}}"></line>
+      <line x1="{{ config.page_size[0]-1 }}" y1="{{ h+ 2*i*h }}" x2="{{ config.page_size[0]-1 }}" y2="{{h+ ((2*i)+1)*h}}"></line>
+    {% endfor %}
+  </g>
 </svg>
