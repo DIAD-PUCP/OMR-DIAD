@@ -1,3 +1,4 @@
+import csv
 import sys
 from io import BytesIO
 from multiprocessing import Pool
@@ -12,7 +13,7 @@ from PIL import Image
 from pypdf import PdfReader
 
 from form import Form, OutputFormat
-from generate import draw_form
+from generate import draw_form, generate_forms_html
 from processing import format_output, process_form
 
 app = typer.Typer()
@@ -34,6 +35,29 @@ def generate_template(
         decorations = f.read()
     form = draw_form(config, decorations)
     print(form)
+
+
+@app.command()
+def generate_forms(
+    config_file: Annotated[
+        Path, typer.Option(dir_okay=False, readable=True, exists=True)
+    ],
+    data_file: Annotated[
+        Path, typer.Option(dir_okay=False, readable=True, exists=True)
+    ],
+    decorations_file: Annotated[
+        Path, typer.Option(dir_okay=False, readable=True, exists=True)
+    ],
+):
+    with open(config_file) as f:
+        json_config = f.read()
+        config = Form.model_validate_json(json_config)
+    with open(data_file) as f:
+        data = [d for d in csv.DictReader(f)]
+    with open(decorations_file) as f:
+        decorations = f.read()
+    forms = generate_forms_html(config, "", data, decorations)
+    print(forms)
 
 
 def proc_img(data) -> Optional[list[str]]:

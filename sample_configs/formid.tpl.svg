@@ -1,0 +1,12 @@
+<svg height="{{config.page_size[1]}}" width="{{config.page_size[0]}}" xmlns="http://www.w3.org/2000/svg">
+  <g id="form-id-marked" transform="translate({{config.form_id.position[0]}} {{config.form_id.position[1]}})">
+    {% set size_w,size_h = config.form_id.item_size %}
+    {% for j in range(config.form_id.nrows) %}
+      {% for i in range(config.form_id.nopts) %}
+        {% if formid[j][i] == '1' %}
+          <rect class="id-mark" x="{{i*size_w}}" y="{{j*size_h}}" fill="black"></rect>
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  </g>
+</svg>

@@ -84,7 +84,6 @@
     </g>
     {% endfor %}
   </g>
-  {{ decorations | safe }}
   <g class="border-guides">
     {% set n = 3 %}
     {% set N = (n*2)+1 %}
@@ -97,4 +96,11 @@
       <line x1="{{ config.page_size[0]-1 }}" y1="{{ h+ 2*i*h }}" x2="{{ config.page_size[0]-1 }}" y2="{{h+ ((2*i)+1)*h}}"></line>
     {% endfor %}
   </g>
+  <g class="formid">
+  \{\{ form_id | safe \}\}
+  </g>
+  <g class="data">
+  \{\{ data | safe \}\}
+  </g>
+  {{ decorations | safe }}
 </svg>
