@@ -1,4 +1,4 @@
-<svg height="{{config.page_size[1]}}" width="{{config.page_size[0]}}" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 {{config.page_size[0]}} {{config.page_size[1]}}" xmlns="http://www.w3.org/2000/svg">
   <style>
     .item{
       fill: transparent;
