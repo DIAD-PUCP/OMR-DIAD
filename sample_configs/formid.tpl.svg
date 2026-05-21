@@ -4,7 +4,7 @@
     {% for j in range(config.form_id.nrows) %}
       {% for i in range(config.form_id.nopts) %}
         {% if formid[j][i] == '1' %}
-          <rect class="id-mark" x="{{i*size_w}}" y="{{j*size_h}}" fill="black"></rect>
+          <rect class="id-mark" x="{{i*size_w}}" y="{{j*size_h}}" height="{{size_h}}" width="{{size_w}}" fill="black"></rect>
         {% endif %}
       {% endfor %}
     {% endfor %}

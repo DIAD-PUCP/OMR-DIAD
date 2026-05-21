@@ -97,10 +97,14 @@
     {% endfor %}
   </g>
   <g class="formid">
-  \{\{ form_id | safe \}\}
+  {% raw %}
+  {{ form_id | safe }}
+  {% endraw %}
   </g>
   <g class="data">
-  \{\{ data | safe \}\}
+  {% raw %}
+  {{ data | safe }}
+  {% endraw %}
   </g>
   {{ decorations | safe }}
 </svg>
