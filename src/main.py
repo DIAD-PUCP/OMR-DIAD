@@ -48,6 +48,9 @@ def generate_forms(
     decorations_file: Annotated[
         Path, typer.Option(dir_okay=False, readable=True, exists=True)
     ],
+    custom_elements_file: Annotated[
+        Optional[Path], typer.Option(dir_okay=False, readable=True, exists=True)
+    ] = None,
 ):
     with open(config_file) as f:
         json_config = f.read()
@@ -56,7 +59,12 @@ def generate_forms(
         data = [d for d in csv.DictReader(f)]
     with open(decorations_file) as f:
         decorations = f.read()
-    forms = generate_forms_html(config, "", data, decorations)
+    if custom_elements_file is not None:
+        with open(custom_elements_file) as f:
+            custom = f.read()
+    else:
+        custom = ""
+    forms = generate_forms_html(config, custom, data, decorations)
     print(forms)
 
 
