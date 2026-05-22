@@ -7,7 +7,7 @@ from form import Form, ItemBlock
 
 def draw_form(config: Form, decorations: Optional[str] = None) -> str:
     jinja_env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader("sample_configs"),
+        loader=jinja2.FileSystemLoader("templates"),
         autoescape=True,
         trim_blocks=True,
     )
@@ -22,7 +22,7 @@ def generate_forms_html(
     decorations: Optional[str] = None,
 ) -> str:
     jinja_env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader("sample_configs"),
+        loader=jinja2.FileSystemLoader("templates"),
         autoescape=True,
         trim_blocks=True,
     )
