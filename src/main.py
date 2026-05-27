@@ -117,6 +117,7 @@ def process(
         config = Form.model_validate_json(json_config)
 
     for fname in fnames:
+        print(f"Processing {fname}:", file=sys.stderr)
         images = read_images(fname, convert)
         images = [
             (i, fname, config, np.array(img), out_dir, debug_dir, error_dir)
