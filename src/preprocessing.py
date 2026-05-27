@@ -38,9 +38,17 @@ def find_skew_barcode(
 ) -> tuple[float, float, float]:
     width = code.position.top_right.x - code.position.bottom_left.x
     pad = int(width / 20)
+    x1, x2 = code.position.top_left.x, code.position.bottom_right.x
+    y1, y2 = code.position.top_left.y, code.position.bottom_right.y
+
+    if x2 < x1:
+        x1, x2 = x2, x1
+    if y2 < y1:
+        y1, y2 = y2, y1
+
     code_img = src_img[
-        code.position.top_left.y - pad : code.position.bottom_right.y + pad,
-        code.position.top_left.x - pad : code.position.bottom_right.x + pad,
+        y1 - pad : y2 + pad,
+        x1 - pad : x2 + pad,
     ]
     code_gray = cv2.cvtColor(code_img, cv2.COLOR_RGB2GRAY)
     _, code_bin = cv2.threshold(
