@@ -196,9 +196,14 @@ def preprocess_image_barcodes(
 
     blur_img = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=0)
     bottom_left, top_right = find_segment_barcodes(blur_img, segment)
-
-    bl = bottom_left.position.bottom_left
-    tr = top_right.position.top_right
+    if bottom_left.position.bottom_left.y > bottom_left.position.top_left.y:
+        bl = bottom_left.position.bottom_left
+    else:
+        bl = bottom_left.position.top_left
+    if top_right.position.top_right.y < top_right.position.bottom_right.y:
+        tr = top_right.position.top_right
+    else:
+        tr = top_right.position.bottom_right
 
     segment_width = tr.x - bl.x
     segment_height = bl.y - tr.y
