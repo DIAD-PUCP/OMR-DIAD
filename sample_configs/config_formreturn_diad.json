@@ -1,5 +1,6 @@
 {
   "name": "formreturn",
+  "threshold": 0.2,
   "page_size": [
     962,
     1240
