@@ -59,6 +59,9 @@ def find_skew_barcode(
     last_x = 0
     first, last = None, None
     for c in contours:
+        # TODO: change area size to be dependent on code size
+        if cv2.contourArea(c) < 10:
+            continue
         rot_box = cv2.minAreaRect(c)
         if rot_box[0][0] < first_x:
             first_x = rot_box[0][0]
