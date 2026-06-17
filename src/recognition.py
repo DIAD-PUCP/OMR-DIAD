@@ -12,5 +12,5 @@ def detect_selected_answer(
     marks: MatLike, area: int, threshold: float
 ) -> tuple[MatLike, MatLike]:
     odds = np.round(marks / area, 3)
-    selected = (odds > 2 * np.std(odds)) & (odds >= threshold)
+    selected = (odds > 1.75 * np.std(odds)) & (odds >= threshold)
     return odds, selected
