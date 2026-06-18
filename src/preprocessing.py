@@ -176,14 +176,17 @@ def preprocess_image_barcodes(
     blur_img = cv2.GaussianBlur(src_img, ksize=(3, 3), sigmaX=0)
 
     if deskew == "lines":
-        skew, x, y = find_skew(blur_img)
+        skew, _, _ = find_skew(blur_img)
     else:
         bottom_left, top_right = find_segment_barcodes(blur_img, segment)
-        skew1, x, y = find_skew_barcode(blur_img, bottom_left)
+        skew1, _, _ = find_skew_barcode(blur_img, bottom_left)
         skew2, _, _ = find_skew_barcode(blur_img, top_right)
         skew = (skew1 + skew2) / 2
+        skew = skew - bottom_left.orientation
 
-    rot_mat = cv2.getRotationMatrix2D((x, y), skew, 1)
+    rot_mat = cv2.getRotationMatrix2D(
+        (src_img.shape[1] / 2, src_img.shape[0] / 2), skew, 1
+    )
 
     img = cv2.warpAffine(
         src_img,
