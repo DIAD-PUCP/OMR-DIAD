@@ -116,7 +116,7 @@ def process(
         json_config = f.read()
         config = Form.model_validate_json(json_config)
 
-    for fname in fnames:
+    for n, fname in enumerate(fnames):
         print(f"Processing {fname}:", file=sys.stderr)
         images = read_images(fname, convert)
         images = [
@@ -132,7 +132,7 @@ def process(
             for data in tqdm.tqdm(images):
                 results.append(proc_img(data))
 
-        output = format_output(config, results, output_format)
+        output = format_output(config, results, output_format, use_header=(n == 0))
         print(output)
 
 

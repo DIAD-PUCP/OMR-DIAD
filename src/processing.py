@@ -173,7 +173,12 @@ def process_form(
     return [str(formid)] + list(chain.from_iterable(ans))
 
 
-def format_output(config: Form, results: list[list[str]], format: OutputFormat) -> str:
+def format_output(
+    config: Form,
+    results: list[list[str]],
+    format: OutputFormat,
+    use_header: bool = True,
+) -> str:
     res = []
     if format == OutputFormat.DAT:
         for ficha in results:
@@ -187,6 +192,9 @@ def format_output(config: Form, results: list[list[str]], format: OutputFormat) 
         return "\n".join(sorted(res))
     else:
         for ficha in results:
-            res.append(",".join([f'"{el}"' for el in ficha]))
-        header = ",".join([f'"{col}"' for col in config.get_header()])
-        return header + "\n" + "\n".join(sorted(res))
+            res.append(",".join([f'"{el if el != " " else ""}"' for el in ficha]))
+        if use_header:
+            header = ",".join([f'"{col}"' for col in config.get_header()]) + "\n"
+        else:
+            header = ""
+        return header + "\n".join(sorted(res))
