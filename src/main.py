@@ -14,7 +14,7 @@ from pypdf import PdfReader
 
 from form import Form, OutputFormat
 from generate import draw_form, generate_forms_html
-from processing import format_output, process_form
+from processing import format_output, process_form, read_source_data
 
 app = typer.Typer()
 
@@ -69,14 +69,19 @@ def generate_forms(
 
 
 def proc_img(data) -> Optional[list[str]]:
-    i, fname, config, image, out, debug, error = data
+    i, fname, config, image, out, debug, error, source_data, data_key = data
     try:
         result = process_form(
             config,
             image,
             output_dir=out,
             debug_dir=debug,
-            extra={"filename": fname, "page_num": i + 1},
+            extra={
+                "filename": fname,
+                "page_num": i + 1,
+                "data": source_data,
+                "data_key": data_key,
+            },
         )
         return result
     except RuntimeError as e:
@@ -99,6 +104,11 @@ def process(
     config_file: Annotated[
         Path, typer.Option(dir_okay=False, readable=True, exists=True)
     ],
+    data_file: Annotated[
+        Optional[Path], typer.Option(dir_okay=False, readable=True, exists=True)
+    ] = None,
+    data_id: Annotated[str, typer.Option()] = "formid",
+    data_key: Annotated[str, typer.Option()] = "EXAMEN",
     single_process: Annotated[bool, typer.Option()] = False,
     convert: Annotated[bool, typer.Option()] = False,
     out_dir: Annotated[
@@ -116,11 +126,24 @@ def process(
         json_config = f.read()
         config = Form.model_validate_json(json_config)
 
+    if data_file is not None:
+        source_data = read_source_data(data_file, data_id)
+
     for n, fname in enumerate(fnames):
         print(f"Processing {fname}:", file=sys.stderr)
         images = read_images(fname, convert)
         images = [
-            (i, fname, config, np.array(img), out_dir, debug_dir, error_dir)
+            (
+                i,
+                fname,
+                config,
+                np.array(img),
+                out_dir,
+                debug_dir,
+                error_dir,
+                source_data,
+                data_key,
+            )
             for i, img in enumerate(images)
         ]
 
@@ -132,7 +155,9 @@ def process(
             for data in tqdm.tqdm(images):
                 results.append(proc_img(data))
 
-        output = format_output(config, results, output_format, use_header=(n == 0))
+        output = format_output(
+            config, results, output_format, use_header=(n == 0), source_data=source_data
+        )
         print(output)
 
 

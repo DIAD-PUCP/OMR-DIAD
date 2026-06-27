@@ -22,7 +22,7 @@ def find_barcode_id(config: Form, src_img: MatLike) -> str:
 
     for bcode in barcodes:
         if bcode.text not in segment_barcodes:
-            return bcode.text
+            return bcode.text.split("-")[0]
     raise RuntimeError("Form ID barcode not found")
 
 
