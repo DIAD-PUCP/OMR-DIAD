@@ -1,4 +1,7 @@
+from csv import DictReader
 from itertools import chain
+from pathlib import Path
+from typing import Optional
 
 import cv2
 import numpy as np
@@ -161,6 +164,9 @@ def process_form(
     elif isinstance(config.form_id, ItemBlock):
         res = preprocess_image_timing_marks(config, image)
         formid = find_itemblock_id(config, res)
+    if extra["data"] is not None:
+        data = extra["data"][formid]
+        formid = data[extra["data_key"]]
     marks = read_bubbles(config, res)
     ans, prob = process_mcq_marks(config, marks)
     Image.fromarray(res).save(
@@ -170,7 +176,10 @@ def process_form(
     Image.fromarray(debug).save(
         f"{debug_dir}/{formid} ({extra['filename'].name} {extra['page_num']}).png"
     )
-    return [str(formid)] + list(chain.from_iterable(ans))
+    if extra["data"] is not None:
+        return list(data.values())[1:] + list(chain.from_iterable(ans))
+    else:
+        return [str(formid)] + list(chain.from_iterable(ans))
 
 
 def format_output(
@@ -178,6 +187,7 @@ def format_output(
     results: list[list[str]],
     format: OutputFormat,
     use_header: bool = True,
+    source_data: Optional[dict[str, dict[str, str]]] = None,
 ) -> str:
     res = []
     if format == OutputFormat.DAT:
@@ -194,7 +204,23 @@ def format_output(
         for ficha in results:
             res.append(",".join([f'"{el if el != " " else ""}"' for el in ficha]))
         if use_header:
-            header = ",".join([f'"{col}"' for col in config.get_header()]) + "\n"
+            if source_data is not None:
+                data_header = (
+                    list(next(iter(source_data.values())).keys())[1:]
+                    + config.get_header()[1:]
+                )
+            else:
+                data_header = config.get_header()
+            header = ",".join([f'"{col}"' for col in data_header]) + "\n"
         else:
             header = ""
         return header + "\n".join(sorted(res))
+
+
+def read_source_data(data_file: Path, data_id: str) -> dict[str, dict[str, str]]:
+    res = {}
+    with open(data_file) as f:
+        reader = DictReader(f)
+        for row in reader:
+            res[row[data_id]] = row
+    return res
