@@ -4,6 +4,7 @@ import streamlit as st
 
 def main():
     st.title("Revisión de fichas")
+    archivo_plantilla = st.file_uploader("Plantilla ficha")
     archivo_formreturn = st.file_uploader("Archivo formreturn")
     archivo_omr = st.file_uploader("Archivo OMR")
     if archivo_formreturn and archivo_omr:
