@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Optional
 
+import numpy as np
 from pydantic import BaseModel
 
 
@@ -94,3 +95,26 @@ class Form(BaseModel):
                 for i in range(labels[0], labels[1] + 1):
                     header.append(f"{ib.label_prefix}{i}")
         return header
+
+    def get_fragment_positions(self) -> dict[str, tuple[int, int, int, int]]:
+        res = {}
+        for segment in self.segments:
+            position = np.array(segment.position)
+            for ib in segment.item_blocks:
+                start = position + np.array(ib.position)
+                width, height = ib.item_size
+                if ib.labels is None:
+                    labels = (1, ib.nrows)
+                else:
+                    labels = ib.labels
+                labels = [
+                    f"{ib.label_prefix}{i}" for i in range(labels[0], labels[1] + 1)
+                ]
+                for i, label in enumerate(labels):
+                    res[label] = (
+                        int(start[0]),
+                        int(start[1]) + (height * i),
+                        width * ib.nopts,
+                        height,
+                    )
+        return res

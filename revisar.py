@@ -1,10 +1,18 @@
+from io import StringIO
+
 import pandas as pd
 import streamlit as st
+
+from src.form import Form
 
 
 def main():
     st.title("Revisión de fichas")
     archivo_plantilla = st.file_uploader("Plantilla ficha")
+    if archivo_plantilla:
+        form_json = StringIO(archivo_plantilla.getvalue().decode("utf-8")).read()
+        form = Form.model_validate_json(form_json)
+        positions = form.get_fragment_positions()
     archivo_formreturn = st.file_uploader("Archivo formreturn")
     archivo_omr = st.file_uploader("Archivo OMR")
     if archivo_formreturn and archivo_omr:
@@ -31,6 +39,9 @@ def main():
         for i in d.index.unique(0):
             st.markdown(f"### {i}")
             st.dataframe(d.loc[i].T, width="content")
+            if positions:
+                x, y, w, h = positions[i]
+                st.write(x, y, w, h)
 
 
 if __name__ == "__main__":
