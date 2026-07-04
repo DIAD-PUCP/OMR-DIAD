@@ -1,0 +1,270 @@
+{
+  "name": "formreturn",
+  "threshold": 0.2,
+  "page_size": [
+    1190,
+    1684
+  ],
+  "form_id": {
+    "position": [
+      634,
+      1588
+    ],
+    "size": [
+      486,
+      36
+    ],
+    "text": ""
+  },
+  "segments": [
+    {
+      "segment_type": "barcodes",
+      "position": [
+        60,
+        204
+      ],
+      "size": [
+        1070,
+        1440
+      ],
+      "bottom_left": {
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          0,
+          0
+        ],
+        "text": "02"
+      },
+      "top_right": {
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          0,
+          0
+        ],
+        "text": "01"
+      },
+      "item_blocks": [
+        {
+          "position": [
+            44,
+            24
+          ],
+          "item_size": [
+            40,
+            44
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 15,
+          "nopts": 5,
+          "labels": [
+            1,
+            15
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ]
+        },
+        {
+          "position": [
+            44,
+            736
+          ],
+          "item_size": [
+            40,
+            44
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 15,
+          "nopts": 5,
+          "labels": [
+            16,
+            30
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ]
+        },
+        {
+          "position": [
+            328,
+            24
+          ],
+          "item_size": [
+            40,
+            44
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 12,
+          "nopts": 5,
+          "labels": [
+            31,
+            42
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ]
+        },
+        {
+          "position": [
+            328,
+            605
+          ],
+          "item_size": [
+            40,
+            44
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 4,
+          "nopts": 5,
+          "labels": [
+            43,
+            46
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ]
+        },
+        {
+          "position": [
+            328,
+            868
+          ],
+          "item_size": [
+            40,
+            44
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 12,
+          "nopts": 5,
+          "labels": [
+            47,
+            58
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ]
+        },
+        {
+          "position": [
+            600,
+            24
+          ],
+          "item_size": [
+            40,
+            44
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 8,
+          "nopts": 5,
+          "labels": [
+            59,
+            66
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ]
+        },
+        {
+          "position": [
+            620,
+            470
+          ],
+          "item_size": [
+            40,
+            44
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 20,
+          "nopts": 4,
+          "labels": [
+            67,
+            86
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ]
+        },
+        {
+          "position": [
+            871,
+            112
+          ],
+          "item_size": [
+            40,
+            44
+          ],
+          "bubble_size": [
+            20,
+            17
+          ],
+          "nrows": 10,
+          "nopts": 4,
+          "labels": [
+            87,
+            96
+          ],
+          "bubble_labels": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ]
+        }
+      ]
+    }
+  ]
+}
