@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
-import zxingcpp
+import zxingcpp  # type: ignore
 from cv2.typing import MatLike
 
-from form import Barcode, BarcodesSegment, Form, ItemBlock
+from omr_diad.form import Barcode, BarcodesSegment, Form, ItemBlock
 
 
 def find_barcode_id(config: Form, src_img: MatLike) -> str:

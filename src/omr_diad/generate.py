@@ -2,7 +2,7 @@ from typing import Optional
 
 import jinja2
 
-from form import Form, ItemBlock
+from omr_diad.form import Form, ItemBlock
 
 
 def draw_form(config: Form, decorations: Optional[str] = None) -> str:

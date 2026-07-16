@@ -24,7 +24,13 @@ dev = [
     "pytest-cov>=7.1.0",
 ]
 
+[project.scripts]
+omr-diad = "omr_diad.main:app"
+
 [tool.pytest.ini_options]
 addopts = ["--cov","--import-mode=importlib"]
 testpaths = "tests"
-pythonpath = ["src"]
+
+[build-system]
+requires = ["uv_build>=0.11.29,<0.12.0"]
+build-backend = "uv_build"

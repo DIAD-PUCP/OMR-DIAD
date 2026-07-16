@@ -8,10 +8,13 @@ import numpy as np
 from cv2.typing import MatLike
 from PIL import Image
 
-from form import Barcode, Form, ItemBlock, OutputFormat
-from form_id import find_barcode_id, find_itemblock_id
-from preprocessing import preprocess_image_barcodes, preprocess_image_timing_marks
-from recognition import calculate_values, detect_selected_answer
+from omr_diad.form import Barcode, Form, ItemBlock, OutputFormat
+from omr_diad.form_id import find_barcode_id, find_itemblock_id
+from omr_diad.preprocessing import (
+    preprocess_image_barcodes,
+    preprocess_image_timing_marks,
+)
+from omr_diad.recognition import calculate_values, detect_selected_answer
 
 
 def apply_brightness_contrast(

@@ -12,9 +12,9 @@ import typer
 from PIL import Image
 from pypdf import PdfReader
 
-from form import Form, OutputFormat
-from generate import draw_form, generate_forms_html
-from processing import format_output, process_form, read_source_data
+from omr_diad.form import Form, OutputFormat
+from omr_diad.generate import draw_form, generate_forms_html
+from omr_diad.processing import format_output, process_form, read_source_data
 
 app = typer.Typer()
 

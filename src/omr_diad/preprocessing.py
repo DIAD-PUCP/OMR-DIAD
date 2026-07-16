@@ -1,10 +1,10 @@
 import cv2
 import numpy as np
-import zxingcpp
+import zxingcpp  # type: ignore
 from cv2.typing import MatLike
 from numpy.typing import NDArray
 
-from form import BarcodesSegment, Form, TimingMarksSegment
+from omr_diad.form import BarcodesSegment, Form, TimingMarksSegment
 
 
 def find_skew(src_img: MatLike) -> tuple[float, float, float]:

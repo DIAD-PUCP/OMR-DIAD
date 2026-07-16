@@ -4,8 +4,8 @@ from tempfile import TemporaryDirectory
 
 import numpy as np
 
-from form import Barcode, Form, ItemBlock
-from main import proc_img, read_images
+from omr_diad.form import Barcode, Form, ItemBlock
+from omr_diad.main import proc_img, read_images
 
 
 def test_config_load(subtests):
@@ -66,6 +66,8 @@ def test_form_diad(subtests):
             out_dir.name,
             debug_dir.name,
             error_dir.name,
+            None,
+            "",
         )
         for i, img in enumerate(images)
     ]
@@ -95,6 +97,8 @@ def test_formreturn_diad(subtests):
             out_dir.name,
             debug_dir.name,
             error_dir.name,
+            None,
+            "",
         )
         for i, img in enumerate(images)
     ]
