@@ -107,7 +107,7 @@ def process(
     data_file: Annotated[
         Optional[Path], typer.Option(dir_okay=False, readable=True, exists=True)
     ] = None,
-    data_id: Annotated[str, typer.Option()] = "formid",
+    data_id: Annotated[str, typer.Option()] = "form_id",
     data_key: Annotated[str, typer.Option()] = "EXAMEN",
     single_process: Annotated[bool, typer.Option()] = False,
     convert: Annotated[bool, typer.Option()] = False,
