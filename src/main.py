@@ -128,6 +128,8 @@ def process(
 
     if data_file is not None:
         source_data = read_source_data(data_file, data_id)
+    else:
+        source_data = None
 
     for n, fname in enumerate(fnames):
         print(f"Processing {fname}:", file=sys.stderr)
