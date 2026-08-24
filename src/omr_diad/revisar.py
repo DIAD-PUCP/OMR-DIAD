@@ -8,7 +8,7 @@ import pandas as pd
 import streamlit as st
 from PIL import Image
 
-from src.form import Form
+from omr_diad.form import Form
 
 
 def get_scans(scans_dir: Path) -> dict[str, Path]:
@@ -41,7 +41,7 @@ def main():
         if st.button("Limpiar"):
             st.session_state["correcciones"] = {}
     st.title("Revisión de fichas")
-    files = get_scans(Path("outputs/cepresimjun26/"))
+    files = get_scans(Path("outputs/simago26/"))
     archivo_plantilla = st.file_uploader("Plantilla ficha")
     if archivo_plantilla:
         form_json = StringIO(archivo_plantilla.getvalue().decode("utf-8")).read()
