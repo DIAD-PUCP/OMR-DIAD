@@ -86,7 +86,8 @@ def proc_img(data) -> Optional[list[str]]:
         return result
     except RuntimeError as e:
         print(e, file=sys.stderr)
-        Image.fromarray(image).save(f"{error}/({i + 1})_{fname.parts[-1]}")
+        img_path = f"{error}/({i + 1})_{fname.stem}.png"
+        Image.fromarray(image).save(img_path)
         return None
 
 
