@@ -41,7 +41,11 @@ def main():
         if st.button("Limpiar"):
             st.session_state["correcciones"] = {}
     st.title("Revisión de fichas")
-    files = get_scans(Path("outputs/simago26/"))
+    folders = [
+        folder for folder in os.listdir("outputs") if os.path.isdir(f"outputs/{folder}")
+    ]
+    scans_folder = st.selectbox("Carpeta con escaneos:", folders)
+    files = get_scans(Path(f"outputs/{scans_folder}/"))
     archivo_plantilla = st.file_uploader("Plantilla ficha")
     if archivo_plantilla:
         form_json = StringIO(archivo_plantilla.getvalue().decode("utf-8")).read()
@@ -60,13 +64,13 @@ def main():
                     file_name="resultado.csv",
                     mime="text/csv",
                 )
-
-        fr = fr.set_index("EXAMEN").loc[:, "item1":].sort_index().fillna("")
+        first_column = st.selectbox("Primer item:", options=fr.columns)
+        fr = fr.set_index("EXAMEN").loc[:, first_column:].sort_index().fillna("")
         fr = fr.map(lambda x: "!!ERROR!!" if x.startswith("!!ERROR!!") else x)
         omr = (
             pd.read_csv(archivo_omr, dtype="str")
             .set_index("EXAMEN")
-            .loc[:, "item1":]
+            .loc[:, first_column:]
             .sort_index()
             .fillna("")
         )
