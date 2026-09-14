@@ -7,8 +7,9 @@ from numpy.typing import NDArray
 from omr_diad.form import BarcodesSegment, Form, TimingMarksSegment
 
 
-def crop_black_edges(src_img: MatLike) -> MatLike:
-    y, x, _ = np.nonzero(src_img)
+def crop_black_edges(src_img: MatLike, threshold=0) -> MatLike:
+    gray = cv2.cvtColor(src_img, cv2.COLOR_RGB2GRAY)
+    y, x = np.nonzero(gray > threshold)
     return src_img[np.min(y) : np.max(y), np.min(x) : np.max(x)]
 
 
@@ -207,7 +208,7 @@ def preprocess_image_barcodes(
         rot_mat,
         (src_img.shape[1], src_img.shape[0]),
         borderMode=cv2.BORDER_CONSTANT,
-        borderValue=0,
+        borderValue=(255, 255, 255),
         flags=cv2.INTER_LANCZOS4,
     )
 
