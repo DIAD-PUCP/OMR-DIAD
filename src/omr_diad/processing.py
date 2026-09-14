@@ -1,7 +1,6 @@
 from csv import DictReader
 from itertools import chain
 from pathlib import Path
-from typing import Optional
 
 import cv2
 import numpy as np
@@ -163,7 +162,7 @@ def process_form(
 ) -> list[str]:
     if isinstance(config.form_id, Barcode):
         res = preprocess_image_barcodes(config, image)
-        formid = find_barcode_id(config, image)
+        formid = find_barcode_id(config, res)
     elif isinstance(config.form_id, ItemBlock):
         res = preprocess_image_timing_marks(config, image)
         formid = find_itemblock_id(config, res)
@@ -190,7 +189,7 @@ def format_output(
     results: list[list[str]],
     format: OutputFormat,
     use_header: bool = True,
-    source_data: Optional[dict[str, dict[str, str]]] = None,
+    source_data: dict[str, dict[str, str]] | None = None,
 ) -> str:
     res = []
     if format == OutputFormat.DAT:

@@ -7,6 +7,11 @@ from numpy.typing import NDArray
 from omr_diad.form import BarcodesSegment, Form, TimingMarksSegment
 
 
+def crop_black_edges(src_img: MatLike) -> MatLike:
+    y, x, _ = np.nonzero(src_img)
+    return src_img[np.min(y) : np.max(y), np.min(x) : np.max(x)]
+
+
 def find_skew(src_img: MatLike) -> tuple[float, float, float]:
     gray = cv2.cvtColor(src_img, cv2.COLOR_RGB2GRAY)
     _, img_bin = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
@@ -146,7 +151,7 @@ def find_segment_barcodes(
     img: MatLike, segment: BarcodesSegment
 ) -> tuple[zxingcpp.Barcode, zxingcpp.Barcode]:
     barcodes = zxingcpp.read_barcodes(
-        img, try_rotate=False, formats=[zxingcpp.BarcodeFormat.Code128]
+        img, try_rotate=True, formats=[zxingcpp.BarcodeFormat.Code128]
     )
     bottom_left = None
     top_right = None
@@ -179,10 +184,19 @@ def preprocess_image_barcodes(
         skew, _, _ = find_skew(blur_img)
     else:
         bottom_left, top_right = find_segment_barcodes(blur_img, segment)
+        if bottom_left.orientation != 0:
+            if bottom_left.orientation == 90:
+                rotation = cv2.ROTATE_90_COUNTERCLOCKWISE
+            elif bottom_left.orientation == 180 or bottom_left.orientation == -180:
+                rotation = cv2.ROTATE_180
+            else:
+                rotation = cv2.ROTATE_90_CLOCKWISE
+            src_img = cv2.rotate(src_img, rotation)
+            blur_img = cv2.rotate(blur_img, rotation)
+            bottom_left, top_right = find_segment_barcodes(blur_img, segment)
         skew1, _, _ = find_skew_barcode(blur_img, bottom_left)
         skew2, _, _ = find_skew_barcode(blur_img, top_right)
         skew = (skew1 + skew2) / 2
-        skew = skew - bottom_left.orientation
 
     rot_mat = cv2.getRotationMatrix2D(
         (src_img.shape[1] / 2, src_img.shape[0] / 2), skew, 1
