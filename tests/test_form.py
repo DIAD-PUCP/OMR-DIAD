@@ -7,7 +7,6 @@ broken fixture files need to be committed.
 
 import copy
 import json
-from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
@@ -24,8 +23,7 @@ from omr_diad.form import (
     Striped,
     TimingMarksSegment,
 )
-
-SAMPLES = Path(__file__).resolve().parents[1] / "sample_configs"
+from tests.conftest import SAMPLES
 
 # Sample configs whose ``form_id`` is a barcode and whose single segment is a
 # barcodes segment.

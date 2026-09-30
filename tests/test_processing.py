@@ -1,23 +1,13 @@
 """Unit tests for the pure helpers in ``omr_diad.processing``."""
 
-from pathlib import Path
-
 import numpy as np
-import pytest
 
-from omr_diad.form import Form, OutputFormat
+from omr_diad.form import OutputFormat
 from omr_diad.processing import (
     apply_brightness_contrast,
     format_output,
     read_source_data,
 )
-
-SAMPLES = Path(__file__).resolve().parents[1] / "sample_configs"
-
-
-@pytest.fixture
-def config() -> Form:
-    return Form.model_validate_json((SAMPLES / "config.json").read_text())
 
 
 def test_format_output_csv(config, subtests):

@@ -44,22 +44,21 @@ def test_detect_selected_answer(subtests):
         assert selected.tolist() == [
             [True, False, False],
             [False, True, False],
-            [True, True, True],
-        ]
-
-    with subtests.test("tied row selects every option when above threshold"):
-        # A row where all options are equal has std == 0, so every option passes
-        # the ``odds > 1.96 * std`` comparison and the threshold check.
-        _, selected = detect_selected_answer(marks, area=100, threshold=0.4)
-        assert selected[2].all()
-
-    with subtests.test("tied row is dropped by a higher threshold"):
-        _, selected = detect_selected_answer(marks, area=100, threshold=0.6)
-        assert selected.tolist() == [
-            [True, False, False],
-            [False, True, False],
             [False, False, False],
         ]
+
+    with subtests.test("two strong marks are both selected"):
+        # Both marks clear the row mean and the threshold, so neither is dropped.
+        double = np.array([[160.0, 4.0, 0.0, 146.0]])
+        _, selected = detect_selected_answer(double, area=100, threshold=0.4)
+        assert selected.tolist() == [[True, False, False, True]]
+
+    with subtests.test("threshold rejects a faint mark the mean test would keep"):
+        faint = np.array([[35.0, 10.0, 5.0, 0.0]])
+        _, selected = detect_selected_answer(faint, area=100, threshold=0.4)
+        assert not selected.any()
+        _, selected = detect_selected_answer(faint, area=100, threshold=0.2)
+        assert selected.tolist() == [[True, False, False, False]]
 
     with subtests.test("output shape follows the input marks"):
         big = np.zeros((5, 4), dtype=np.float64)
