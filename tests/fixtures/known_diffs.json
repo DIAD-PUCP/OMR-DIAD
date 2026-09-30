@@ -1,0 +1,11 @@
+{
+  "_comment": "Explicitly tolerated golden differences, keyed by row id then item label. Use only for diffs that the answer-presence rule cannot cover.",
+  "reasons": {
+    "28883/item40": "Partial multi-mark detection: OMR reports 'A' where the reference has 'A,D'.",
+    "29554/item23": "Partial multi-mark detection: OMR reports 'D' where the reference has 'A,D'."
+  },
+  "rows": {
+    "28883": ["item40"],
+    "29554": ["item23"]
+  }
+}
