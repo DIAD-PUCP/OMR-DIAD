@@ -143,6 +143,17 @@ def test_itemblock_defaults():
     assert block.color == "#85c8ff"
     assert block.opacity == 0.5
     assert block.striped is None
+    assert block.bubble_corner_radius is None
+
+
+def test_bubble_corner_radius_is_parsed():
+    config = copy_sample(ITEMBLOCK_CONFIG)
+    config["segments"][0]["item_blocks"][0]["bubble_corner_radius"] = 4
+
+    validated = Form.model_validate(config)
+
+    block = validated.segments[0].item_blocks[0]
+    assert block.bubble_corner_radius == 4
 
 
 # ---------------------------------------------------------------------------
@@ -358,6 +369,7 @@ def test_form_wrong_types_rejected(change, loc, error_type):
         ("position", ["a", "b"], ("position", 0)),
         ("nrows", "abc", ("nrows",)),
         ("nopts", None, ("nopts",)),
+        ("bubble_corner_radius", "abc", ("bubble_corner_radius",)),
     ],
 )
 def test_itemblock_wrong_types_rejected(field, value, loc):
@@ -375,6 +387,26 @@ def test_itemblock_wrong_types_rejected(field, value, loc):
 
     errors = exc.value.errors()
     assert any(e["loc"] == loc and e["type"] != "missing" for e in errors)
+
+
+@pytest.mark.parametrize("value", [0, -1])
+def test_bubble_corner_radius_must_be_positive(value):
+    with pytest.raises(ValidationError) as exc:
+        ItemBlock.model_validate(
+            {
+                "position": [0, 0],
+                "nrows": 1,
+                "nopts": 1,
+                "item_size": [1, 1],
+                "bubble_size": [1, 1],
+                "bubble_corner_radius": value,
+            }
+        )
+
+    assert any(
+        e["type"] == "greater_than" and e["loc"] == ("bubble_corner_radius",)
+        for e in exc.value.errors()
+    )
 
 
 def test_union_without_matching_branch_rejected(subtests):

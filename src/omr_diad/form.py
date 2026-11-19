@@ -1,8 +1,7 @@
 from enum import Enum
-from typing import Optional
 
 import numpy as np
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class OutputFormat(str, Enum):
@@ -36,14 +35,15 @@ class ItemBlock(BaseModel):
     nopts: int
     item_size: tuple[int, int]
     bubble_size: tuple[int, int]
-    orientation: Optional[BlockOrientation] = BlockOrientation.HORIZONTAL
-    block_type: Optional[BlockType] = BlockType.MCQ
+    bubble_corner_radius: int | None = Field(default=None, gt=0)
+    orientation: BlockOrientation | None = BlockOrientation.HORIZONTAL
+    block_type: BlockType | None = BlockType.MCQ
     label_prefix: str = "item"
-    labels: Optional[tuple[int, int]] = None
-    bubble_labels: Optional[list[str]] = None
-    color: Optional[str] = "#85c8ff"
-    opacity: Optional[float] = 0.5
-    striped: Optional[Striped] = None
+    labels: tuple[int, int] | None = None
+    bubble_labels: list[str] | None = None
+    color: str | None = "#85c8ff"
+    opacity: float | None = 0.5
+    striped: Striped | None = None
 
 
 class Barcode(BaseModel):
@@ -82,7 +82,7 @@ class Form(BaseModel):
     contrast: int = 0
     brightness: int = 0
     threshold: float = 0.4
-    luminance: Optional[int] = None
+    luminance: int | None = None
 
     def get_header(self) -> list[str]:
         header = ["ID"]
