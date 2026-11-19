@@ -81,6 +81,24 @@ def debug_img(
     return src_img
 
 
+def draw_mask(block: ItemBlock) -> MatLike:
+    size = np.array(block.item_size)
+    bubble = np.array(block.bubble_size)
+    mask = np.zeros((size[1], size[0]), dtype=np.uint8)
+    if block.bubble_corner_radius is None:
+        mask = cv2.ellipse(
+            mask,
+            (round(size[0] / 2), round(size[1] / 2)),
+            (round(bubble[0] / 2), round(bubble[1] / 2)),
+            0,
+            0,
+            360,
+            255,
+            -1,
+        )
+    return mask
+
+
 def process_mcq_marks(
     config: Form, marks: list[MatLike]
 ) -> tuple[list[MatLike], list[MatLike]]:
@@ -89,20 +107,8 @@ def process_mcq_marks(
     probabilities = []
     for segment in config.segments:
         for block in segment.item_blocks:
-            size = np.array(block.item_size)
-            bubble = np.array(block.bubble_size)
-            area = np.zeros((size[1], size[0]), dtype=np.uint8)
-            area = cv2.ellipse(
-                area,
-                (round(size[0] / 2), round(size[1] / 2)),
-                (round(bubble[0] / 2), round(bubble[1] / 2)),
-                0,
-                0,
-                360,
-                255,
-                -1,
-            )
-            area = cv2.countNonZero(area)
+            mask = draw_mask(block)
+            area = cv2.countNonZero(mask)
             odds, ans = detect_selected_answer(marks[k], area, config.threshold)
             ans = np.strings.multiply(
                 np.array(block.bubble_labels), ans.astype(np.int8)
@@ -130,18 +136,7 @@ def read_bubbles(config: Form, src_img: MatLike) -> list[MatLike]:
             res = np.zeros(shape=(block.nrows, block.nopts), dtype=np.float64)
             start = position + np.array(block.position)
             size = np.array(block.item_size)
-            bubble = np.array(block.bubble_size)
-            mask = np.zeros((size[1], size[0]), dtype=np.uint8)
-            mask = cv2.ellipse(
-                mask,
-                (round(size[0] / 2), round(size[1] / 2)),
-                (round(bubble[0] / 2), round(bubble[1] / 2)),
-                0,
-                0,
-                360,
-                255,
-                -1,
-            )
+            mask = draw_mask(block)
             for j in range(block.nrows):
                 for i in range(block.nopts):
                     pos0 = start + np.array([i, j]) * size
@@ -158,8 +153,10 @@ def process_form(
     image: MatLike,
     output_dir: str = ".",
     debug_dir: str = ".",
-    extra: dict = {},
+    extra: dict | None = None,
 ) -> list[str]:
+    if extra is None:
+        extra = {}
     if isinstance(config.form_id, Barcode):
         res = preprocess_image_barcodes(config, image)
         formid = find_barcode_id(config, res)
