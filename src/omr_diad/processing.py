@@ -96,6 +96,19 @@ def draw_mask(block: ItemBlock) -> MatLike:
             255,
             -1,
         )
+    else:
+        radius = min(
+            block.bubble_corner_radius, int(bubble[0]) // 2, int(bubble[1]) // 2
+        )
+        x1 = round((size[0] - bubble[0]) / 2)
+        y1 = round((size[1] - bubble[1]) / 2)
+        x2 = x1 + int(bubble[0])
+        y2 = y1 + int(bubble[1])
+        mask = cv2.rectangle(mask, (x1 + radius, y1), (x2 - radius, y2), 255, -1)
+        mask = cv2.rectangle(mask, (x1, y1 + radius), (x2, y2 - radius), 255, -1)
+        for cx in (x1 + radius, x2 - radius):
+            for cy in (y1 + radius, y2 - radius):
+                mask = cv2.circle(mask, (cx, cy), radius, 255, -1)
     return mask
 
 

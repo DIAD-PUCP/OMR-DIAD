@@ -1,10 +1,13 @@
 """Unit tests for the pure helpers in ``omr_diad.processing``."""
 
+import cv2
 import numpy as np
+import pytest
 
-from omr_diad.form import OutputFormat
+from omr_diad.form import ItemBlock, OutputFormat
 from omr_diad.processing import (
     apply_brightness_contrast,
+    draw_mask,
     format_output,
     read_source_data,
 )
@@ -92,3 +95,37 @@ def test_apply_brightness_contrast(subtests):
         assert out.shape == rgb.shape
         assert out.dtype == rgb.dtype
         assert not np.array_equal(out, rgb)
+
+
+def test_draw_mask(subtests):
+    block_kwargs = {
+        "position": (0, 0),
+        "nrows": 1,
+        "nopts": 1,
+        "item_size": (100, 100),
+        "bubble_size": (80, 80),
+    }
+
+    with subtests.test("no radius draws an ellipse"):
+        mask = draw_mask(ItemBlock(**block_kwargs))
+        assert mask.shape == (100, 100)
+        assert mask.dtype == np.uint8
+        # A filled ellipse with axes 80x80.
+        assert cv2.countNonZero(mask) == pytest.approx(np.pi * 40 * 40, rel=0.05)
+
+    with subtests.test("radius draws a rounded rectangle"):
+        mask = draw_mask(ItemBlock(**block_kwargs, bubble_corner_radius=20))
+        assert mask.shape == (100, 100)
+        assert mask.dtype == np.uint8
+
+        # Inside the 80x80 bubble box (10..90): centre and edge midpoints are
+        # filled, the rounded-off box corner is not.
+        assert mask[50, 50] == 255  # centre
+        assert mask[50, 10] == 255  # left edge midpoint
+        assert mask[10, 10] == 0  # box corner, outside the rounding
+        assert mask[10, 50] == 255  # top edge midpoint
+
+        # Area = full box minus the four rounded-off corner slivers:
+        # w*h - (4 - pi) * r^2.
+        expected = 80 * 80 - (4 - np.pi) * 20**2
+        assert cv2.countNonZero(mask) == pytest.approx(expected, rel=0.05)
