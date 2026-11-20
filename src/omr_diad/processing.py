@@ -56,11 +56,13 @@ def debug_img(
                 for i in range(block.nopts):
                     pos0 = start + np.array([i, j]) * size
                     pos1 = pos0 + size
-                    src_img = cv2.rectangle(src_img, pos0, pos1, color=(255, 0, 0, 255))
+                    src_img = cv2.rectangle(
+                        src_img, tuple(pos0), tuple(pos1), color=(255, 0, 0, 255)
+                    )
                     src_img = cv2.putText(
                         src_img,
                         str(values[k][j][i]),
-                        pos0,
+                        tuple(pos0),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=0.24,
                         color=(255, 0, 0, 255),

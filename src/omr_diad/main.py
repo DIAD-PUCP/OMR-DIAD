@@ -68,7 +68,7 @@ def generate_forms(
     print(forms)
 
 
-def proc_img(data) -> list[str] | None:
+def proc_img(data) -> list[str]:
     i, fname, config, image, out, debug, error, source_data, data_key = data
     try:
         result = process_form(
@@ -88,7 +88,7 @@ def proc_img(data) -> list[str] | None:
         print(e, file=sys.stderr)
         img_path = f"{error}/({i + 1})_{fname.stem}.png"
         Image.fromarray(image).save(img_path)
-        return None
+        return []
 
 
 def read_images(pdf_path: Path, convert_image: bool = False) -> list[Image.Image]:
@@ -157,7 +157,6 @@ def process(
             results = []
             for data in tqdm.tqdm(images):
                 results.append(proc_img(data))
-
         output = format_output(
             config, results, output_format, use_header=(n == 0), source_data=source_data
         )

@@ -16,7 +16,7 @@ def barcode_config() -> Form:
 
 
 def test_find_barcode_id_rejects_non_barcode_config(config):
-    with pytest.raises(RuntimeError, match="barcode_id"):
+    with pytest.raises(TypeError, match="barcode_id"):
         find_barcode_id(config, np.zeros((10, 10, 3), dtype=np.uint8))
 
 
@@ -27,5 +27,5 @@ def test_find_barcode_id_without_a_barcode_raises(barcode_config):
 
 
 def test_find_itemblock_id_rejects_non_itemblock_config(barcode_config):
-    with pytest.raises(RuntimeError, match="ItemBlock"):
+    with pytest.raises(TypeError, match="ItemBlock"):
         find_itemblock_id(barcode_config, np.zeros((10, 10, 3), dtype=np.uint8))

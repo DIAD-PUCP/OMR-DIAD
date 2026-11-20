@@ -5,7 +5,6 @@
 from pathlib import Path
 
 import numpy as np
-import pytest
 
 from omr_diad.main import proc_img, read_images
 from omr_diad.processing import process_form
@@ -70,7 +69,7 @@ def test_proc_img_missing_barcode_is_captured(barcode_config, tmp_path):
         "",
     )
 
-    assert proc_img(data) is None
+    assert proc_img(data) == []
     # proc_img names the capture "({page})_{stem}.png".
     assert (error / "(1)_blank.png").exists()
     assert not any(out.iterdir())

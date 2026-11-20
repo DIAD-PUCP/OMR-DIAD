@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from cv2.typing import MatLike
+from numpy.typing import NDArray
 
 
 def calculate_values(aoi_bw: MatLike, aoi_gray: MatLike, mask: MatLike) -> float:
@@ -10,7 +11,7 @@ def calculate_values(aoi_bw: MatLike, aoi_gray: MatLike, mask: MatLike) -> float
 
 def detect_selected_answer(
     marks: MatLike, area: int, threshold: float
-) -> tuple[MatLike, MatLike]:
+) -> tuple[MatLike, NDArray]:
     odds = marks / area
     selected = (odds > 1.96 * np.std(odds, axis=1, keepdims=True)) & (odds >= threshold)
     return np.round(odds, 3), selected

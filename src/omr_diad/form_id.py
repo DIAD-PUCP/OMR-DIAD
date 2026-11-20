@@ -9,7 +9,7 @@ from omr_diad.form import Barcode, BarcodesSegment, Form, ItemBlock
 def find_barcode_id(config: Form, src_img: MatLike) -> str:
     code = config.form_id
     if not isinstance(code, Barcode):
-        raise RuntimeError("Config file does not define a barcode_id")
+        raise TypeError("Config file does not define a barcode_id")
     segment_barcodes = []
     for segment in config.segments:
         if isinstance(segment, BarcodesSegment):
@@ -29,7 +29,7 @@ def find_barcode_id(config: Form, src_img: MatLike) -> str:
 def find_itemblock_id(config: Form, src_img: MatLike) -> str:
     id_block = config.form_id
     if not isinstance(id_block, ItemBlock):
-        raise RuntimeError("Config file does not define a ItemBlock Id")
+        raise TypeError("Config file does not define a ItemBlock Id")
     size = np.array(id_block.item_size)
     pos = np.array(id_block.position)
     nrows = id_block.nrows
