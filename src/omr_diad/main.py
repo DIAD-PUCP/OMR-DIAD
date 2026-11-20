@@ -3,7 +3,7 @@ import sys
 from io import BytesIO
 from multiprocessing import Pool
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import numpy as np
 import pdf2image
@@ -49,7 +49,7 @@ def generate_forms(
         Path, typer.Option(dir_okay=False, readable=True, exists=True)
     ],
     custom_elements_file: Annotated[
-        Optional[Path], typer.Option(dir_okay=False, readable=True, exists=True)
+        Path | None, typer.Option(dir_okay=False, readable=True, exists=True)
     ] = None,
 ):
     with open(config_file) as f:
@@ -68,7 +68,7 @@ def generate_forms(
     print(forms)
 
 
-def proc_img(data) -> Optional[list[str]]:
+def proc_img(data) -> list[str] | None:
     i, fname, config, image, out, debug, error, source_data, data_key = data
     try:
         result = process_form(
@@ -106,7 +106,7 @@ def process(
         Path, typer.Option(dir_okay=False, readable=True, exists=True)
     ],
     data_file: Annotated[
-        Optional[Path], typer.Option(dir_okay=False, readable=True, exists=True)
+        Path | None, typer.Option(dir_okay=False, readable=True, exists=True)
     ] = None,
     data_id: Annotated[str, typer.Option()] = "form_id",
     data_key: Annotated[str, typer.Option()] = "EXAMEN",
