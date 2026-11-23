@@ -43,7 +43,7 @@ def find_skew_barcode(
     src_img: MatLike, code: zxingcpp.Barcode
 ) -> tuple[float, float, float]:
     width = code.position.top_right.x - code.position.bottom_left.x
-    pad = int(width / 20)
+    pad = round(width / 20)
     x1, x2 = code.position.top_left.x, code.position.bottom_right.x
     y1, y2 = code.position.top_left.y, code.position.bottom_right.y
 
@@ -233,7 +233,7 @@ def preprocess_image_barcodes(
         None,
         fx=scale_factor[0],
         fy=scale_factor[1],
-        interpolation=cv2.INTER_LINEAR,
+        interpolation=cv2.INTER_LANCZOS4,
     )
 
     tmat = np.array([[1, 0, offset[0]], [0, 1, offset[1]]], dtype=np.float32)
