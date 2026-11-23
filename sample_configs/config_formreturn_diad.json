@@ -1,6 +1,7 @@
 {
   "name": "formreturn",
   "threshold": 0.2,
+  "luminance": 200,
   "page_size": [
     962,
     1240
@@ -63,6 +64,7 @@
             20,
             17
           ],
+          "bubble_corner_radius": 6,
           "nrows": 19,
           "nopts": 4,
           "labels": [
@@ -89,6 +91,7 @@
             20,
             17
           ],
+          "bubble_corner_radius": 6,
           "nrows": 19,
           "nopts": 4,
           "labels": [
@@ -115,6 +118,7 @@
             20,
             17
           ],
+          "bubble_corner_radius": 6,
           "nrows": 19,
           "nopts": 4,
           "labels": [
@@ -141,6 +145,7 @@
             20,
             17
           ],
+          "bubble_corner_radius": 6,
           "nrows": 19,
           "nopts": 4,
           "labels": [
