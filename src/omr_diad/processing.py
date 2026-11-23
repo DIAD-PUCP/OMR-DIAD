@@ -116,15 +116,16 @@ def draw_mask(block: ItemBlock) -> MatLike:
 
 def process_mcq_marks(
     config: Form, marks: list[MatLike]
-) -> tuple[list[MatLike], list[MatLike]]:
+) -> tuple[list[MatLike], list[MatLike], list[MatLike]]:
     k = 0
     answers = []
     probabilities = []
+    scores = []
     for segment in config.segments:
         for block in segment.item_blocks:
             mask = draw_mask(block)
             area = cv2.countNonZero(mask)
-            odds, ans = detect_selected_answer(marks[k], area, config.threshold)
+            odds, ans, sco = detect_selected_answer(marks[k], area, config.threshold)
             ans = np.strings.multiply(
                 np.array(block.bubble_labels), ans.astype(np.int8)
             )
@@ -132,8 +133,9 @@ def process_mcq_marks(
             ans = np.array([" " if a == "" else a for a in ans])
             probabilities.append(odds)
             answers.append(ans)
+            scores.append(sco)
             k = k + 1
-    return (answers, probabilities)
+    return (answers, probabilities, scores)
 
 
 def read_bubbles(config: Form, src_img: MatLike) -> list[MatLike]:
@@ -182,11 +184,11 @@ def process_form(
         data = extra["data"][formid]
         formid = data[extra["data_key"]]
     marks = read_bubbles(config, res)
-    ans, prob = process_mcq_marks(config, marks)
+    ans, prob, sco = process_mcq_marks(config, marks)
     Image.fromarray(res).save(
         f"{output_dir}/{formid} ({extra['filename'].name} {extra['page_num']}).png"
     )
-    debug = debug_img(config, res, prob, ans)
+    debug = debug_img(config, res, sco, ans)
     Image.fromarray(debug).save(
         f"{debug_dir}/{formid} ({extra['filename'].name} {extra['page_num']}).png"
     )
