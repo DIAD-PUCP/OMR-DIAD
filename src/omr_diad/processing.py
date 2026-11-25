@@ -1,7 +1,6 @@
 from csv import DictReader
 from itertools import chain
 from pathlib import Path
-from sys import stderr
 
 import cv2
 import numpy as np
@@ -185,16 +184,15 @@ def process_form(
         data = extra["data"][formid]
         formid = data[extra["data_key"]]
     marks = read_bubbles(config, res)
-    ans, _prob, sco = process_mcq_marks(config, marks)
-    check = np.any(np.abs(np.array(sco) - 1.0) <= 0.15)
-    if check:
-        print(f"Check {formid}", file=stderr)
+    ans, prob, sco = process_mcq_marks(config, marks)
+    check = np.any(np.abs(np.array(sco) - 1.0) <= 0.10)
+    tag = "[R]" if check else ""
     Image.fromarray(res).save(
         f"{output_dir}/{formid} ({extra['filename'].name} {extra['page_num']}).png"
     )
-    debug = debug_img(config, res, sco, ans)
+    debug = debug_img(config, res, prob, ans)
     Image.fromarray(debug).save(
-        f"{debug_dir}/{formid} ({extra['filename'].name} {extra['page_num']}).png"
+        f"{debug_dir}/{tag}{formid} ({extra['filename'].name} {extra['page_num']}).png"
     )
     if extra["data"] is not None:
         return list(data.values())[1:] + list(chain.from_iterable(ans))
